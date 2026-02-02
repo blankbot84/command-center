@@ -4,7 +4,6 @@ import { Note, ColumnId, COLUMNS } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Sheet,
   SheetContent,
@@ -26,8 +25,12 @@ export function NoteDetail({ note, open, onClose, onMove, onToggleAction }: Note
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-[85vh] md:h-[80vh] p-0 flex flex-col">
-        <SheetHeader className="p-4 md:p-6 pb-0 flex-shrink-0">
+      <SheetContent 
+        side="bottom" 
+        className="h-[85vh] p-0 flex flex-col rounded-t-xl"
+      >
+        {/* Fixed Header */}
+        <SheetHeader className="p-4 md:p-6 pb-4 flex-shrink-0 border-b border-border">
           <div className="space-y-2">
             <Badge
               className={cn(
@@ -48,8 +51,9 @@ export function NoteDetail({ note, open, onClose, onMove, onToggleAction }: Note
           </div>
         </SheetHeader>
 
-        <ScrollArea className="flex-1 px-4 md:px-6">
-          <div className="space-y-6 pb-6">
+        {/* Scrollable Content - using native scroll */}
+        <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y">
+          <div className="p-4 md:p-6 space-y-6">
             {/* Synopsis */}
             <section>
               <h4 className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mb-2 font-bold">
@@ -85,7 +89,7 @@ export function NoteDetail({ note, open, onClose, onMove, onToggleAction }: Note
                   {note.actions.map((action, i) => (
                     <label 
                       key={i} 
-                      className="py-3 border-b border-border flex items-start gap-3 cursor-pointer hover:bg-accent/50 transition-colors"
+                      className="py-3 border-b border-border flex items-start gap-3 cursor-pointer active:bg-accent/50 transition-colors"
                     >
                       <Checkbox
                         checked={action.done}
@@ -109,7 +113,7 @@ export function NoteDetail({ note, open, onClose, onMove, onToggleAction }: Note
               <h4 className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mb-2 font-bold">
                 Transcript
               </h4>
-              <div className="bg-background border border-border p-4 text-sm leading-relaxed max-h-48 overflow-y-auto whitespace-pre-wrap">
+              <div className="bg-background border border-border p-4 text-sm leading-relaxed whitespace-pre-wrap">
                 {note.transcript.split(/(\d{2}:\d{2}:\d{2})/g).map((part, i) => (
                   part.match(/^\d{2}:\d{2}:\d{2}$/) ? (
                     <span key={i} className="block mt-3 first:mt-0 mb-1 font-mono text-[10px] text-leo tracking-wider">
@@ -121,10 +125,13 @@ export function NoteDetail({ note, open, onClose, onMove, onToggleAction }: Note
                 ))}
               </div>
             </section>
+            
+            {/* Bottom padding for buttons */}
+            <div className="h-4" />
           </div>
-        </ScrollArea>
+        </div>
 
-        {/* Move buttons */}
+        {/* Fixed Footer - Move buttons */}
         <div className="p-4 border-t border-border flex gap-2 flex-shrink-0 bg-card">
           {COLUMNS.filter(c => c.id !== note.column).map(col => (
             <Button
