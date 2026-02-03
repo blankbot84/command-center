@@ -1,4 +1,50 @@
 import { Note } from './types';
+import { DataSource, MockDataSource, GitHubDataSource } from './data-source';
+
+// ─────────────────────────────────────────────────────────────
+// CONFIGURED DATA SOURCE
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Get the configured data source based on environment variables.
+ * 
+ * Environment variables:
+ * - DATA_SOURCE: 'mock' | 'github' (default: 'mock')
+ * - GITHUB_TOKEN: GitHub personal access token for API auth
+ * - DATA_CACHE_TTL: Cache TTL in milliseconds (default: 60000)
+ */
+export function getDataSource(): DataSource {
+  const sourceType = process.env.DATA_SOURCE || 'mock';
+  
+  if (sourceType === 'github') {
+    const token = process.env.GITHUB_TOKEN;
+    const cacheTTL = process.env.DATA_CACHE_TTL 
+      ? parseInt(process.env.DATA_CACHE_TTL, 10) 
+      : undefined;
+    
+    return new GitHubDataSource(token, cacheTTL);
+  }
+  
+  return new MockDataSource();
+}
+
+// Singleton instance for server-side use
+let dataSourceInstance: DataSource | null = null;
+
+export function getDataSourceInstance(): DataSource {
+  if (!dataSourceInstance) {
+    dataSourceInstance = getDataSource();
+  }
+  return dataSourceInstance;
+}
+
+// Re-export types and classes for convenience
+export type { DataSource };
+export { MockDataSource, GitHubDataSource };
+
+// ─────────────────────────────────────────────────────────────
+// LEGACY SAMPLE DATA (for backward compatibility)
+// ─────────────────────────────────────────────────────────────
 
 export const sampleNotes: Note[] = [
   {
