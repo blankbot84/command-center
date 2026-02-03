@@ -45,7 +45,7 @@ export function MobileSheetNav({ currentView, onViewChange }: MobileSheetNavProp
         <Menu className="w-5 h-5" />
       </button>
 
-      <SheetContent side="bottom" showCloseButton={false} className="rounded-t-2xl pb-8">
+      <SheetContent side="top" showCloseButton={false} className="rounded-b-2xl pt-2">
         <SheetHeader className="pb-2">
           <SheetTitle className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
             Navigation
@@ -80,8 +80,6 @@ export function MobileSheetNav({ currentView, onViewChange }: MobileSheetNavProp
           ))}
         </nav>
 
-        {/* Safe area for home indicator on iOS */}
-        <div className="h-4" />
       </SheetContent>
     </Sheet>
   );
