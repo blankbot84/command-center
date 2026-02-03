@@ -1,16 +1,62 @@
 'use client';
 
-import { useState } from 'react';
-import { mockAgents, mockTasks, mockActivity, Agent, Task } from '@/lib/mission-control-data';
+import { useState, useCallback } from 'react';
+import { mockAgents, mockTasks, mockActivity, Agent } from '@/lib/mission-control-data';
+import { AgentDetail, MockDataSource, GitHubDataSource, DataSource } from '@/lib/data-source';
 import { AgentCard } from './agent-card';
+import { AgentDetailView } from './agent-detail-view';
 import { ActivityFeed } from './activity-feed';
 import { TaskList } from './task-list';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+
+// Initialize data source based on environment
+function getDataSource(): DataSource {
+  const source = process.env.NEXT_PUBLIC_DATA_SOURCE || 'mock';
+  if (source === 'github') {
+    const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
+    return new GitHubDataSource(token);
+  }
+  return new MockDataSource();
+}
 
 export function SquadDashboard() {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [agentDetail, setAgentDetail] = useState<AgentDetail | null>(null);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+
+  // Fetch agent detail when an agent is selected
+  const fetchAgentDetail = useCallback(async (agent: Agent) => {
+    setIsLoadingDetail(true);
+    try {
+      const dataSource = getDataSource();
+      const detail = await dataSource.getAgentDetail(agent.id);
+      setAgentDetail(detail);
+    } catch (error) {
+      console.error('Failed to fetch agent detail:', error);
+      setAgentDetail(null);
+    } finally {
+      setIsLoadingDetail(false);
+    }
+  }, []);
+
+  const handleAgentClick = useCallback((agent: Agent) => {
+    setSelectedAgent(agent);
+    setAgentDetail(null); // Clear previous detail
+    fetchAgentDetail(agent);
+  }, [fetchAgentDetail]);
+
+  const handleRefresh = useCallback(() => {
+    if (selectedAgent) {
+      fetchAgentDetail(selectedAgent);
+    }
+  }, [selectedAgent, fetchAgentDetail]);
+
+  const handleClose = useCallback(() => {
+    setSelectedAgent(null);
+    setAgentDetail(null);
+  }, []);
 
   // Stats
   const workingCount = mockAgents.filter(a => a.status === 'working').length;
@@ -85,7 +131,7 @@ export function SquadDashboard() {
                 <AgentCard
                   key={agent.id}
                   agent={agent}
-                  onClick={() => setSelectedAgent(agent)}
+                  onClick={() => handleAgentClick(agent)}
                 />
               ))}
             </div>
@@ -118,7 +164,7 @@ export function SquadDashboard() {
               <AgentCard
                 key={agent.id}
                 agent={agent}
-                onClick={() => setSelectedAgent(agent)}
+                onClick={() => handleAgentClick(agent)}
               />
             ))}
           </div>
@@ -149,40 +195,16 @@ export function SquadDashboard() {
       </div>
 
       {/* Agent Detail Sheet */}
-      <Sheet open={!!selectedAgent} onOpenChange={() => setSelectedAgent(null)}>
-        <SheetContent side="bottom" className="h-[70vh] p-0 rounded-t-xl">
+      <Sheet open={!!selectedAgent} onOpenChange={handleClose}>
+        <SheetContent side="bottom" className="h-[80vh] p-0 rounded-t-xl">
           {selectedAgent && (
-            <>
-              <SheetHeader className="p-4 border-b border-border">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl">{selectedAgent.emoji}</span>
-                  <div>
-                    <SheetTitle className="text-left">{selectedAgent.name}</SheetTitle>
-                    <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-                      {selectedAgent.role}
-                    </p>
-                  </div>
-                </div>
-              </SheetHeader>
-              <div className="p-4 overflow-y-auto">
-                <div className="mb-4">
-                  <h4 className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mb-2">
-                    Current Focus
-                  </h4>
-                  <p className="text-sm">
-                    {selectedAgent.focus || 'No active task'}
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mb-2">
-                    Assigned Tasks
-                  </h4>
-                  <TaskList 
-                    tasks={mockTasks.filter(t => t.assignedTo.includes(selectedAgent.id))} 
-                  />
-                </div>
-              </div>
-            </>
+            <AgentDetailView
+              agent={selectedAgent}
+              detail={agentDetail}
+              isLoading={isLoadingDetail}
+              onRefresh={handleRefresh}
+              onClose={handleClose}
+            />
           )}
         </SheetContent>
       </Sheet>
