@@ -1,100 +1,140 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NotesView } from './notes-view';
 import { SquadDashboard } from './mission-control/squad-dashboard';
-import { TasksKanban } from './tasks';
+import { ActivityFeed } from './mission-control/activity-feed';
+import { SearchBar } from './search';
 import { ThemeToggle } from './theme-toggle';
 import { cn } from '@/lib/utils';
-import { sampleNotes } from '@/lib/data';
-import { mockAgents } from '@/lib/mission-control-data';
-import { MockDataSource } from '@/lib/data-source';
+import { getDataSourceInstance } from '@/lib/data';
+import { AppSidebar, NavView } from './app-sidebar';
+import { MobileNav } from './mobile-nav';
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from '@/components/ui/sidebar';
+import type { Activity } from '@/lib/mission-control-data';
+import type { Note } from '@/lib/types';
+import type { Agent } from '@/lib/mission-control-data';
 import type { AgentDetail } from '@/lib/data-source';
-import type { SearchResult } from '@/lib/search';
 
-type View = 'plaud' | 'mission-control' | 'tasks';
+// ActivityView - standalone view showing full activity feed
+function ActivityView() {
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
-export function AppShell() {
-  const [view, setView] = useState<View>('notes');
+  const fetchActivities = async () => {
+    setIsLoading(true);
+    try {
+      const dataSource = getDataSourceInstance();
+      const data = await dataSource.getActivity();
+      setActivities(data);
+      setLastRefresh(new Date());
+    } catch (error) {
+      console.error('Failed to fetch activities:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchActivities();
+  }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      {/* Header with nav */}
-      <header className="sticky top-0 z-50 bg-background border-b border-border">
-        {/* Title bar */}
-        <div className="px-4 py-3 flex justify-between items-center">
-          <div>
-            <h1 className="font-mono text-sm font-bold tracking-[0.25em] uppercase">
-              {view === 'plaud' ? 'PLAUD' : view === 'tasks' ? 'TASK' : 'MISSION'}
-            </h1>
-            <span className="font-mono text-[10px] text-muted-foreground tracking-widest">
-              {view === 'plaud' ? 'NOTES' : view === 'tasks' ? 'BOARD' : 'CONTROL'}
-            </span>
-          </div>
-          <ThemeToggle />
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div>
+          <h2 className="font-mono text-sm font-bold tracking-wider uppercase">Activity Log</h2>
+          <p className="font-mono text-[10px] text-muted-foreground tracking-wider">
+            Recent agent activity
+          </p>
         </div>
-
-        {/* View switcher */}
-        <div className="flex border-t border-border">
-          <button
-            onClick={() => setView('notes')}
-            className={cn(
-              'flex-1 py-2.5 font-mono text-[10px] uppercase tracking-widest transition-colors',
-              'border-b-2',
-              view === 'notes'
-                ? 'border-b-donnie text-foreground'
-                : 'border-b-transparent text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <span className={cn('w-2 h-2 inline-block mr-2', view === 'plaud' ? 'bg-donnie' : 'bg-muted-foreground')} />
-            Notes
-          </button>
-          <button
-            onClick={() => setView('tasks')}
-            className={cn(
-              'flex-1 py-2.5 font-mono text-[10px] uppercase tracking-widest transition-colors',
-              'border-b-2',
-              view === 'tasks'
-                ? 'border-b-leo text-foreground'
-                : 'border-b-transparent text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <span className={cn('w-2 h-2 inline-block mr-2', view === 'tasks' ? 'bg-leo' : 'bg-muted-foreground')} />
-            Tasks
-          </button>
-          <button
-            onClick={() => setView('mission-control')}
-            className={cn(
-              'flex-1 py-2.5 font-mono text-[10px] uppercase tracking-widest transition-colors',
-              'border-b-2',
-              view === 'mission-control'
-                ? 'border-b-raph text-foreground'
-                : 'border-b-transparent text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <span className={cn('w-2 h-2 inline-block mr-2', view === 'mission-control' ? 'bg-raph' : 'bg-muted-foreground')} />
-            Agents
-          </button>
-        </div>
-      </header>
-
-      {/* Main content */}
-      <main className="flex-1 overflow-hidden">
-        {view === 'plaud' && <KanbanBoard embedded />}
-        {view === 'tasks' && <TasksKanban />}
-        {view === 'mission-control' && <SquadDashboard />}
-      </main>
+        <button
+          onClick={fetchActivities}
+          disabled={isLoading}
+          className={cn(
+            'px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider',
+            'border border-border hover:bg-accent transition-colors',
+            isLoading && 'opacity-50 cursor-not-allowed'
+          )}
+        >
+          {isLoading ? 'Loading...' : 'Refresh'}
+        </button>
+      </div>
+      
+      {/* Activity Feed */}
+      <div className="flex-1 overflow-y-auto">
+        <ActivityFeed
+          activities={activities}
+          isLoading={isLoading}
+          onRefresh={fetchActivities}
+          lastRefresh={lastRefresh}
+        />
+      </div>
     </div>
   );
 }
 
+// SearchView - opens the search modal
 function SearchView() {
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agentDetails, setAgentDetails] = useState<Map<string, AgentDetail>>(new Map());
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const dataSource = getDataSourceInstance();
+        const [notesData, agentsData] = await Promise.all([
+          dataSource.getNotes(),
+          dataSource.getAgents(),
+        ]);
+        setNotes(notesData);
+        setAgents(agentsData);
+        
+        // Fetch agent details
+        const details = new Map<string, AgentDetail>();
+        for (const agent of agentsData) {
+          const detail = await dataSource.getAgentDetail(agent.id);
+          if (detail) {
+            details.set(agent.id, detail);
+          }
+        }
+        setAgentDetails(details);
+      } catch (error) {
+        console.error('Failed to fetch search data:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
-    <div className="flex flex-1 items-center justify-center p-8">
-      <div className="text-center">
+    <div className="flex flex-col items-center justify-center h-full p-8">
+      <div className="text-center max-w-md">
         <span className="text-6xl mb-4 block">🔍</span>
         <h2 className="font-mono text-lg font-bold tracking-wider uppercase mb-2">Search</h2>
-        <p className="text-muted-foreground font-mono text-sm">Coming soon...</p>
+        <p className="text-muted-foreground font-mono text-sm mb-6">
+          Search across notes, agents, and daily logs
+        </p>
+        
+        {/* Search bar that triggers the modal */}
+        <div className="flex justify-center">
+          <SearchBar
+            notes={notes}
+            agents={agents}
+            agentDetails={agentDetails}
+            className="w-full max-w-sm"
+          />
+        </div>
+        
+        <p className="text-muted-foreground font-mono text-[10px] mt-4 uppercase tracking-wider">
+          Tip: Press ⌘K anywhere to search
+        </p>
       </div>
     </div>
   );
@@ -128,7 +168,7 @@ export function AppShell() {
   const renderView = () => {
     switch (view) {
       case 'notes':
-        return <KanbanBoard embedded />;
+        return <NotesView />;
       case 'squad':
         return <SquadDashboard />;
       case 'activity':
@@ -138,7 +178,7 @@ export function AppShell() {
       case 'settings':
         return <SettingsView />;
       default:
-        return <KanbanBoard embedded />;
+        return <NotesView />;
     }
   };
 
