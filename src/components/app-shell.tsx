@@ -6,6 +6,7 @@ import { SquadDashboard } from './mission-control/squad-dashboard';
 import { ActivityFeed } from './mission-control/activity-feed';
 import { SearchBar, InlineSearch } from './search';
 import { ThemeToggle } from './theme-toggle';
+import { SettingsView } from './settings-view';
 import { cn } from '@/lib/utils';
 import { getDataSourceInstance } from '@/lib/data';
 import { AppSidebar, NavView } from './app-sidebar';
@@ -141,18 +142,6 @@ function SearchView() {
         <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
           Tip: Press ⌘K anywhere for quick search
         </span>
-      </div>
-    </div>
-  );
-}
-
-function SettingsView() {
-  return (
-    <div className="flex flex-1 items-center justify-center p-8">
-      <div className="text-center">
-        <span className="text-6xl mb-4 block">⚙️</span>
-        <h2 className="font-mono text-lg font-bold tracking-wider uppercase mb-2">Settings</h2>
-        <p className="text-muted-foreground font-mono text-sm">Coming soon...</p>
       </div>
     </div>
   );

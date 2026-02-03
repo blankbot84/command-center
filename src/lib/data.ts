@@ -1,12 +1,22 @@
 import { Note } from './types';
 import { DataSource, MockDataSource, GitHubDataSource } from './data-source';
 
+// localStorage keys (must match settings-view.tsx)
+const STORAGE_KEYS = {
+  dataSource: 'command-center-data-source',
+  cacheTTL: 'command-center-cache-ttl',
+};
+
 // ─────────────────────────────────────────────────────────────
 // CONFIGURED DATA SOURCE
 // ─────────────────────────────────────────────────────────────
 
 /**
- * Get the configured data source based on environment variables.
+ * Get the configured data source.
+ * 
+ * Priority:
+ * 1. localStorage (client-side, allows runtime toggle)
+ * 2. Environment variables (server-side fallback)
  * 
  * Environment variables:
  * - DATA_SOURCE: 'mock' | 'github' (default: 'mock')
@@ -14,28 +24,62 @@ import { DataSource, MockDataSource, GitHubDataSource } from './data-source';
  * - DATA_CACHE_TTL: Cache TTL in milliseconds (default: 60000)
  */
 export function getDataSource(): DataSource {
-  const sourceType = process.env.DATA_SOURCE || 'mock';
+  // Check localStorage first (client-side)
+  let sourceType = 'mock';
+  let cacheTTL: number | undefined;
+  
+  if (typeof window !== 'undefined') {
+    const storedSource = localStorage.getItem(STORAGE_KEYS.dataSource);
+    if (storedSource === 'github' || storedSource === 'mock') {
+      sourceType = storedSource;
+    }
+    
+    const storedTTL = localStorage.getItem(STORAGE_KEYS.cacheTTL);
+    if (storedTTL) {
+      cacheTTL = parseInt(storedTTL, 10);
+    }
+  }
+  
+  // Fall back to environment variables (server-side)
+  if (sourceType === 'mock' && typeof window === 'undefined') {
+    sourceType = process.env.DATA_SOURCE || 'mock';
+    if (process.env.DATA_CACHE_TTL) {
+      cacheTTL = parseInt(process.env.DATA_CACHE_TTL, 10);
+    }
+  }
   
   if (sourceType === 'github') {
     const token = process.env.GITHUB_TOKEN;
-    const cacheTTL = process.env.DATA_CACHE_TTL 
-      ? parseInt(process.env.DATA_CACHE_TTL, 10) 
-      : undefined;
-    
     return new GitHubDataSource(token, cacheTTL);
   }
   
   return new MockDataSource();
 }
 
-// Singleton instance for server-side use
+// Singleton instance - recreated when settings change
 let dataSourceInstance: DataSource | null = null;
+let lastSourceType: string | null = null;
 
 export function getDataSourceInstance(): DataSource {
-  if (!dataSourceInstance) {
-    dataSourceInstance = getDataSource();
+  // Check if source type changed (for client-side reactivity)
+  let currentSourceType = 'mock';
+  if (typeof window !== 'undefined') {
+    currentSourceType = localStorage.getItem(STORAGE_KEYS.dataSource) || 'mock';
   }
+  
+  // Recreate instance if source changed
+  if (!dataSourceInstance || lastSourceType !== currentSourceType) {
+    dataSourceInstance = getDataSource();
+    lastSourceType = currentSourceType;
+  }
+  
   return dataSourceInstance;
+}
+
+// Force refresh the data source instance (call after settings change)
+export function resetDataSourceInstance(): void {
+  dataSourceInstance = null;
+  lastSourceType = null;
 }
 
 // Re-export types and classes for convenience
