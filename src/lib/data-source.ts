@@ -411,18 +411,200 @@ export class GitHubDataSource implements DataSource {
   }
 
   async getActivity(): Promise<Activity[]> {
-    // Try to fetch activity log for current month
-    const now = new Date();
-    const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    
+    const activities: Activity[] = [];
+
     try {
-      const activityMd = await this.fetchRaw(`activity/${monthKey}.md`);
-      return this.parseActivityLog(activityMd);
-    } catch {
-      // Return empty if no activity log found
-      console.warn(`Activity log for ${monthKey} not found`);
-      return [];
+      // Fetch daily notes from memory/daily/
+      const memoryFiles = await this.fetchDirectory('memory/daily');
+      
+      // Filter for date-formatted files (YYYY-MM-DD.md)
+      const dailyFiles = memoryFiles
+        .filter(f => f.name.match(/^\d{4}-\d{2}-\d{2}\.md$/))
+        .sort((a, b) => b.name.localeCompare(a.name)) // newest first
+        .slice(0, 7); // Last 7 days
+
+      for (const file of dailyFiles) {
+        try {
+          const content = await this.fetchRaw(file.path);
+          const date = file.name.replace('.md', '');
+          const parsed = this.parseDailyNoteActivities(content, date);
+          activities.push(...parsed);
+        } catch (err) {
+          console.warn(`Could not load daily note ${file.name}:`, err);
+        }
+      }
+    } catch (err) {
+      console.warn('Could not load daily notes for activity:', err);
     }
+
+    // Sort by timestamp descending
+    return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  }
+
+  /**
+   * Parse activities from a daily note's markdown content.
+   * 
+   * Supports multiple formats:
+   * 1. Timestamped entries: ## 14:32 followed by content
+   * 2. Tagged entries: - [type] Description
+   * 3. Section headers with status indicators: ## Section Title
+   * 4. Checkboxes: - [x] Completed item or - ✅ Item
+   */
+  private parseDailyNoteActivities(content: string, date: string): Activity[] {
+    const activities: Activity[] = [];
+    const lines = content.split('\n');
+    
+    let currentTime = '12:00'; // Default to noon if no time specified
+    let sectionTitle = '';
+    let hourCounter = 9; // For spacing out activities without timestamps
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+      
+      // Skip empty lines and the title line
+      if (!trimmed || trimmed.match(/^# \d{4}-\d{2}-\d{2}/)) continue;
+      
+      // Check for timestamped section header: ## 14:32 or ## 14:32 - Description
+      const timestampMatch = trimmed.match(/^##\s+(\d{1,2}:\d{2})(?:\s*[-–]\s*(.+))?$/);
+      if (timestampMatch) {
+        currentTime = timestampMatch[1].padStart(5, '0');
+        if (timestampMatch[2]) {
+          sectionTitle = timestampMatch[2];
+          activities.push(this.createActivityFromLine(
+            `Started: ${sectionTitle}`,
+            date,
+            currentTime,
+            'status_changed'
+          ));
+        }
+        continue;
+      }
+      
+      // Check for regular section header: ## Section Title
+      const sectionMatch = trimmed.match(/^##\s+(.+)$/);
+      if (sectionMatch) {
+        sectionTitle = sectionMatch[1];
+        // Increment hour for spacing
+        currentTime = `${String(hourCounter++).padStart(2, '0')}:00`;
+        if (hourCounter > 23) hourCounter = 9;
+        continue;
+      }
+      
+      // Check for tagged entries: - [status_change] Description
+      const taggedMatch = trimmed.match(/^[-*]\s+\[([^\]]+)\]\s+(.+)$/);
+      if (taggedMatch) {
+        const [, tag, description] = taggedMatch;
+        const type = this.mapTagToActivityType(tag);
+        activities.push(this.createActivityFromLine(description, date, currentTime, type));
+        continue;
+      }
+      
+      // Check for completed items: - [x] Item or - ✅ Item
+      const completedMatch = trimmed.match(/^[-*]\s+(?:\[x\]|✅)\s+(.+)$/i);
+      if (completedMatch) {
+        activities.push(this.createActivityFromLine(
+          `Completed: ${completedMatch[1]}`,
+          date,
+          currentTime,
+          'status_changed'
+        ));
+        continue;
+      }
+      
+      // Check for bullet items with keywords
+      const bulletMatch = trimmed.match(/^[-*]\s+(.+)$/);
+      if (bulletMatch) {
+        const text = bulletMatch[1];
+        
+        // Skip items that are just references or links
+        if (text.match(/^https?:\/\//)) continue;
+        
+        // Detect activity type from content
+        let type: Activity['type'] = 'status_changed';
+        
+        if (text.match(/\b(created?|built?|implemented?|added?)\b/i)) {
+          type = 'document_created';
+        } else if (text.match(/\b(assigned?|delegated?)\b/i)) {
+          type = 'task_assigned';
+        } else if (text.match(/\b(started?|working|began|progress)\b/i)) {
+          type = 'status_changed';
+        } else if (text.match(/\b(comment|noted?|feedback)\b/i)) {
+          type = 'comment_posted';
+        } else if (text.match(/\b(merged?|PR|pull request|commit)\b/i)) {
+          type = 'document_created';
+        }
+        
+        // Only include meaningful activities (filter out very short items)
+        if (text.length > 15 && !text.match(/^(TODO|FIXME|NOTE):/i)) {
+          activities.push(this.createActivityFromLine(text, date, currentTime, type));
+        }
+      }
+    }
+    
+    return activities;
+  }
+
+  private createActivityFromLine(
+    description: string,
+    date: string,
+    time: string,
+    type: Activity['type']
+  ): Activity {
+    // Try to detect agent from description
+    const agentId = this.detectAgentFromText(description);
+    
+    const timestamp = new Date(`${date}T${time}:00`);
+    const id = `daily-${date}-${time.replace(':', '')}-${Math.random().toString(36).slice(2, 6)}`;
+    
+    return {
+      id,
+      type,
+      agentId,
+      description: this.cleanDescription(description),
+      timestamp,
+    };
+  }
+
+  private detectAgentFromText(text: string): string {
+    const lowerText = text.toLowerCase();
+    
+    if (lowerText.includes('murphie') || lowerText.includes('testing') || lowerText.includes('qa')) {
+      return 'murphie';
+    }
+    if (lowerText.includes('eight') || lowerText.includes('dealership') || lowerText.includes('ga4')) {
+      return 'eight';
+    }
+    if (lowerText.includes('daily') || lowerText.includes('briefing') || lowerText.includes('morning brief')) {
+      return 'daily';
+    }
+    if (lowerText.includes('intel') || lowerText.includes('research') || lowerText.includes('competitor')) {
+      return 'intel';
+    }
+    
+    // Default to bam for general/unknown activities
+    return 'bam';
+  }
+
+  private mapTagToActivityType(tag: string): Activity['type'] {
+    const lowerTag = tag.toLowerCase();
+    
+    if (lowerTag.includes('status') || lowerTag.includes('change')) return 'status_changed';
+    if (lowerTag.includes('task') && lowerTag.includes('create')) return 'task_created';
+    if (lowerTag.includes('assign')) return 'task_assigned';
+    if (lowerTag.includes('comment') || lowerTag.includes('note')) return 'comment_posted';
+    if (lowerTag.includes('document') || lowerTag.includes('create')) return 'document_created';
+    if (lowerTag.includes('agent')) return 'agent_status';
+    
+    return 'status_changed';
+  }
+
+  private cleanDescription(text: string): string {
+    return text
+      .replace(/\*\*/g, '') // Remove bold markdown
+      .replace(/`([^`]+)`/g, '$1') // Remove code ticks
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to just text
+      .trim();
   }
 
   async getAgentDetail(agentId: string): Promise<AgentDetail | null> {
