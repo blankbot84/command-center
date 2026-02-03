@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { mockAgents, mockTasks, mockActivity, Agent } from '@/lib/mission-control-data';
+import { useState, useCallback, useEffect } from 'react';
+import { mockAgents, mockTasks, mockActivity, Agent, Activity } from '@/lib/mission-control-data';
 import { AgentDetail, MockDataSource, GitHubDataSource, DataSource } from '@/lib/data-source';
 import { AgentCard } from './agent-card';
 import { AgentDetailView } from './agent-detail-view';
@@ -21,16 +21,44 @@ function getDataSource(): DataSource {
   return new MockDataSource();
 }
 
+// Singleton data source for the dashboard
+const dataSource = getDataSource();
+
 export function SquadDashboard() {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [agentDetail, setAgentDetail] = useState<AgentDetail | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  
+  // Activity feed state
+  const [activities, setActivities] = useState<Activity[]>(mockActivity);
+  const [isLoadingActivities, setIsLoadingActivities] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+
+  // Fetch activities on mount and when refreshed
+  const fetchActivities = useCallback(async () => {
+    setIsLoadingActivities(true);
+    try {
+      const fetchedActivities = await dataSource.getActivity();
+      // If we got activities from the data source, use them; otherwise fall back to mock
+      setActivities(fetchedActivities.length > 0 ? fetchedActivities : mockActivity);
+      setLastRefresh(new Date());
+    } catch (error) {
+      console.error('Failed to fetch activities:', error);
+      // Keep existing activities on error
+    } finally {
+      setIsLoadingActivities(false);
+    }
+  }, []);
+
+  // Fetch activities on mount
+  useEffect(() => {
+    fetchActivities();
+  }, [fetchActivities]);
 
   // Fetch agent detail when an agent is selected
   const fetchAgentDetail = useCallback(async (agent: Agent) => {
     setIsLoadingDetail(true);
     try {
-      const dataSource = getDataSource();
       const detail = await dataSource.getAgentDetail(agent.id);
       setAgentDetail(detail);
     } catch (error) {
@@ -142,7 +170,12 @@ export function SquadDashboard() {
           </TabsContent>
 
           <TabsContent value="activity" className="mt-0">
-            <ActivityFeed activities={mockActivity} />
+            <ActivityFeed 
+              activities={activities} 
+              isLoading={isLoadingActivities}
+              onRefresh={fetchActivities}
+              lastRefresh={lastRefresh}
+            />
           </TabsContent>
         </Tabs>
       </div>
@@ -185,12 +218,42 @@ export function SquadDashboard() {
 
         {/* Right: Activity Feed */}
         <div className="w-80 flex-shrink-0 border-l border-border overflow-y-auto">
-          <div className="sticky top-0 bg-background z-10 px-4 py-3 border-b border-border">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              Activity
-            </span>
+          <div className="sticky top-0 bg-background z-10 px-4 py-3 border-b border-border flex items-center justify-between">
+            <div>
+              <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Activity
+              </span>
+              <span className="font-mono text-[10px] text-muted-foreground ml-2">
+                {activities.length}
+              </span>
+            </div>
+            <button
+              onClick={fetchActivities}
+              disabled={isLoadingActivities}
+              className="text-muted-foreground hover:text-foreground transition-colors p-1 -mr-1"
+              title="Refresh activities"
+            >
+              <svg
+                className={cn("w-4 h-4", isLoadingActivities && "animate-spin")}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+            </button>
           </div>
-          <ActivityFeed activities={mockActivity} />
+          <ActivityFeed 
+            activities={activities}
+            isLoading={isLoadingActivities}
+            onRefresh={fetchActivities}
+            lastRefresh={lastRefresh}
+          />
         </div>
       </div>
 
