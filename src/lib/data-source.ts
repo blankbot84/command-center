@@ -113,12 +113,18 @@ export interface SquadOverview {
   lastUpdated: Date;
 }
 
+export interface MemoryData {
+  memoryMd: string;
+  dailyNotes: Array<{ date: string; content: string }>;
+}
+
 export interface DataSource {
   getAgents(): Promise<Agent[]>;
   getNotes(): Promise<Note[]>;
   getActivity(): Promise<Activity[]>;
   getAgentDetail(agentId: string): Promise<AgentDetail | null>;
   getTasks(): Promise<Task[]>;
+  getMemory(): Promise<MemoryData>;
 }
 
 // Agent state from WORKING.md frontmatter
@@ -362,6 +368,86 @@ ${getMockExpertise(agentId)}
       agent,
       workingMd,
       soulMd,
+      dailyNotes,
+    };
+  }
+
+  async getMemory(): Promise<MemoryData> {
+    const today = new Date();
+    const dailyNotes: Array<{ date: string; content: string }> = [];
+
+    // Generate mock daily notes for the last 7 days
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+
+      dailyNotes.push({
+        date: dateStr,
+        content: `# ${dateStr}
+
+## Morning Session
+- Started day reviewing overnight messages
+- Checked calendar for upcoming meetings
+- Brief sync with the squad
+
+## Work Items
+- [x] Reviewed PR #${Math.floor(Math.random() * 100 + 1)}
+- [x] Updated documentation for new feature
+- [ ] Follow up on pending feedback
+
+## Notes
+- Key insight: ${['Need to improve test coverage', 'Good progress on main objective', 'Waiting on dependencies'][i % 3]}
+- Tomorrow: Continue with current focus
+
+## Reflections
+${i === 0 ? 'Productive day overall. Made good progress on the main project.' : 'Wrapped up pending items from yesterday.'}
+`,
+      });
+    }
+
+    const memoryMd = `# 🧠 MEMORY.md - Long-Term Memory
+
+## Who I Am
+I'm **Murphie** 🐢 — Quality assurance specialist and testing automation expert for the agent squad.
+
+## Key Context
+
+### Bam (Human)
+- Works on dealership web projects
+- Uses Plaud for voice notes and meeting recordings
+- Prefers concise, actionable summaries
+- Night owl - often works late
+
+### The Squad
+- **Eight** 🎱 - Dealership integrations specialist
+- **Daily** ☀️ - Morning briefings and daily digests
+- **Intel** 🔍 - Research and competitive analysis
+
+## Important Lessons Learned
+1. Always run visual regression tests before PR reviews
+2. Mobile-first design is critical for Command Center
+3. Keep WORKING.md updated for context continuity
+
+## Preferences & Patterns
+- Bam likes dark mode in all apps
+- Quick responses are preferred over perfect ones
+- Use emoji sparingly but meaningfully
+
+## Active Projects
+- **Command Center** - Unified dashboard for agent squad and Plaud notes
+- **Life Data Sync** - GitHub-based state management
+
+## Milestones
+- 2025-02-01: Command Center MVP launched
+- 2025-02-02: Added activity feed and search
+
+---
+*Last updated: ${today.toISOString().split('T')[0]}*
+`;
+
+    return {
+      memoryMd,
       dailyNotes,
     };
   }
@@ -881,6 +967,45 @@ export class GitHubDataSource implements DataSource {
       if (pDiff !== 0) return pDiff;
       return new Date(b.created).getTime() - new Date(a.created).getTime();
     });
+  }
+
+  async getMemory(): Promise<MemoryData> {
+    let memoryMd = '';
+    const dailyNotes: Array<{ date: string; content: string }> = [];
+
+    // Fetch MEMORY.md from memory/MEMORY.md
+    try {
+      memoryMd = await this.fetchRaw('memory/MEMORY.md');
+    } catch (err) {
+      console.warn('Could not load MEMORY.md:', err);
+      memoryMd = '# Memory\n\n_No MEMORY.md found in repository._';
+    }
+
+    // Fetch daily notes from memory/daily/
+    try {
+      const memoryFiles = await this.fetchDirectory('memory/daily');
+      const mdFiles = memoryFiles
+        .filter(f => f.name.match(/^\d{4}-\d{2}-\d{2}\.md$/))
+        .sort((a, b) => b.name.localeCompare(a.name)) // newest first
+        .slice(0, 30); // Last 30 days
+
+      for (const file of mdFiles) {
+        try {
+          const content = await this.fetchRaw(file.path);
+          const date = file.name.replace('.md', '');
+          dailyNotes.push({ date, content });
+        } catch {
+          console.warn(`Could not load daily note ${file.name}`);
+        }
+      }
+    } catch (err) {
+      console.warn('Could not load daily notes directory:', err);
+    }
+
+    return {
+      memoryMd,
+      dailyNotes,
+    };
   }
 
   // ───────────────────────────────────────────────────────────
