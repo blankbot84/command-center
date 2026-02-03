@@ -47,7 +47,7 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-  
+
   /* TMNT Colors */
   --color-leo: var(--leo);
   --color-raph: var(--raph);
@@ -78,19 +78,19 @@
   --border: #e0e0e0;
   --input: #e0e0e0;
   --ring: #0a0a0a;
-  
+
   /* TMNT - adjusted for light */
   --leo: #2563eb;
   --raph: #dc2626;
   --donnie: #7c3aed;
   --mikey: #ea580c;
-  
+
   --chart-1: var(--leo);
   --chart-2: var(--donnie);
   --chart-3: var(--mikey);
   --chart-4: var(--raph);
   --chart-5: #10b981;
-  
+
   --sidebar: #ffffff;
   --sidebar-foreground: #0a0a0a;
   --sidebar-primary: #0a0a0a;
@@ -121,19 +121,19 @@
   --border: #2a2a2a;
   --input: #2a2a2a;
   --ring: #f0f0f0;
-  
+
   /* TMNT */
   --leo: #4a9eff;
   --raph: #ff4a4a;
   --donnie: #a855f7;
   --mikey: #ff9f1c;
-  
+
   --chart-1: var(--leo);
   --chart-2: var(--donnie);
   --chart-3: var(--mikey);
   --chart-4: var(--raph);
   --chart-5: #22c55e;
-  
+
   --sidebar: #141414;
   --sidebar-foreground: #f0f0f0;
   --sidebar-primary: #f0f0f0;
@@ -150,5 +150,14 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
