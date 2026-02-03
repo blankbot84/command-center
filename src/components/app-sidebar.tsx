@@ -16,12 +16,13 @@ import {
 import { ThemeToggle } from './theme-toggle';
 import { cn } from '@/lib/utils';
 
-export type NavView = 'notes' | 'squad' | 'activity' | 'search' | 'settings';
+export type NavView = 'notes' | 'squad' | 'activity' | 'memory' | 'search' | 'settings';
 
 const navItems: { id: NavView; label: string; icon: string; color: string }[] = [
   { id: 'notes', label: 'Notes', icon: '📝', color: 'bg-donnie' },
   { id: 'squad', label: 'Squad', icon: '🤖', color: 'bg-raph' },
   { id: 'activity', label: 'Activity', icon: '📊', color: 'bg-leo' },
+  { id: 'memory', label: 'Memory', icon: '🧠', color: 'bg-purple-500' },
   { id: 'search', label: 'Search', icon: '🔍', color: 'bg-mikey' },
   { id: 'settings', label: 'Settings', icon: '⚙️', color: 'bg-muted-foreground' },
 ];

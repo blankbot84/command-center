@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { NotesView } from './notes-view';
 import { SquadDashboard } from './mission-control/squad-dashboard';
 import { ActivityFeed } from './mission-control/activity-feed';
+import { MemoryView } from './memory-view';
 import { SearchBar, InlineSearch } from './search';
 import { ThemeToggle } from './theme-toggle';
 import { SettingsView } from './settings-view';
@@ -152,6 +153,7 @@ const viewTitles: Record<NavView, { title: string; subtitle: string; color: stri
   notes: { title: 'PLAUD', subtitle: 'NOTES', color: 'text-donnie' },
   squad: { title: 'MISSION', subtitle: 'CONTROL', color: 'text-raph' },
   activity: { title: 'ACTIVITY', subtitle: 'LOG', color: 'text-leo' },
+  memory: { title: 'MEMORY', subtitle: 'BANK', color: 'text-purple-400' },
   search: { title: 'SEARCH', subtitle: 'ALL', color: 'text-mikey' },
   settings: { title: 'SETTINGS', subtitle: 'CONFIG', color: 'text-muted-foreground' },
 };
@@ -180,6 +182,8 @@ export function AppShell() {
         return <SquadDashboard />;
       case 'activity':
         return <ActivityView />;
+      case 'memory':
+        return <MemoryView />;
       case 'search':
         return <SearchView />;
       case 'settings':

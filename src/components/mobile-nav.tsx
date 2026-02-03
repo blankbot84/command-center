@@ -7,8 +7,8 @@ const navItems: { id: NavView; label: string; icon: string }[] = [
   { id: 'notes', label: 'Notes', icon: '📝' },
   { id: 'squad', label: 'Squad', icon: '🤖' },
   { id: 'activity', label: 'Activity', icon: '📊' },
+  { id: 'memory', label: 'Memory', icon: '🧠' },
   { id: 'search', label: 'Search', icon: '🔍' },
-  { id: 'settings', label: 'Settings', icon: '⚙️' },
 ];
 
 interface MobileNavProps {
