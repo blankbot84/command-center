@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { NotesView } from './notes-view';
 import { SquadDashboard } from './mission-control/squad-dashboard';
 import { ActivityFeed } from './mission-control/activity-feed';
-import { SearchBar } from './search';
+import { SearchBar, InlineSearch } from './search';
 import { ThemeToggle } from './theme-toggle';
 import { cn } from '@/lib/utils';
 import { getDataSourceInstance } from '@/lib/data';
@@ -80,14 +80,16 @@ function ActivityView() {
   );
 }
 
-// SearchView - opens the search modal
+// SearchView - inline search for mobile, with ⌘K hint on desktop
 function SearchView() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [agentDetails, setAgentDetails] = useState<Map<string, AgentDetail>>(new Map());
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const dataSource = getDataSourceInstance();
         const [notesData, agentsData] = await Promise.all([
@@ -108,33 +110,37 @@ function SearchView() {
         setAgentDetails(details);
       } catch (error) {
         console.error('Failed to fetch search data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <span className="font-mono text-sm text-muted-foreground">Loading...</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center h-full p-8">
-      <div className="text-center max-w-md">
-        <span className="text-6xl mb-4 block">🔍</span>
-        <h2 className="font-mono text-lg font-bold tracking-wider uppercase mb-2">Search</h2>
-        <p className="text-muted-foreground font-mono text-sm mb-6">
-          Search across notes, agents, and daily logs
-        </p>
-        
-        {/* Search bar that triggers the modal */}
-        <div className="flex justify-center">
-          <SearchBar
-            notes={notes}
-            agents={agents}
-            agentDetails={agentDetails}
-            className="w-full max-w-sm"
-          />
-        </div>
-        
-        <p className="text-muted-foreground font-mono text-[10px] mt-4 uppercase tracking-wider">
-          Tip: Press ⌘K anywhere to search
-        </p>
+    <div className="h-full flex flex-col">
+      {/* Inline search - works great on mobile, also good on desktop */}
+      <InlineSearch
+        notes={notes}
+        agents={agents}
+        agentDetails={agentDetails}
+        autoFocus={true}
+        className="flex-1"
+      />
+      
+      {/* Desktop hint for ⌘K - hidden on mobile */}
+      <div className="hidden md:flex items-center justify-center py-2 border-t border-border bg-secondary/30">
+        <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+          Tip: Press ⌘K anywhere for quick search
+        </span>
       </div>
     </div>
   );
@@ -164,6 +170,18 @@ const viewTitles: Record<NavView, { title: string; subtitle: string; color: stri
 export function AppShell() {
   const [view, setView] = useState<NavView>('notes');
   const currentTitle = viewTitles[view];
+
+  // Global ⌘K shortcut to jump to search from anywhere
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setView('search');
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const renderView = () => {
     switch (view) {
