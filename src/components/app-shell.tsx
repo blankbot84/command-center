@@ -11,7 +11,7 @@ import { SettingsView } from './settings-view';
 import { cn } from '@/lib/utils';
 import { getDataSourceInstance } from '@/lib/data';
 import { AppSidebar, NavView } from './app-sidebar';
-import { MobileNav } from './mobile-nav';
+import { MobileSheetNav } from './mobile-sheet-nav';
 import {
   SidebarProvider,
   SidebarInset,
@@ -200,6 +200,9 @@ export function AppShell() {
         <div className="flex min-h-screen flex-col">
           {/* Header */}
           <header className="sticky top-0 z-50 flex h-14 items-center gap-4 border-b border-border bg-background px-4">
+            {/* Mobile hamburger menu */}
+            <MobileSheetNav currentView={view} onViewChange={setView} />
+            {/* Desktop sidebar trigger */}
             <SidebarTrigger className="-ml-1 hidden md:flex" />
             <div className="flex items-center gap-3">
               <div>
@@ -213,15 +216,12 @@ export function AppShell() {
             </div>
           </header>
 
-          {/* Main content - add bottom padding on mobile for nav */}
-          <main className="flex-1 overflow-hidden pb-16 md:pb-0">
+          {/* Main content - full height, no bottom nav padding needed */}
+          <main className="flex-1 overflow-hidden">
             {renderView()}
           </main>
         </div>
       </SidebarInset>
-
-      {/* Mobile bottom navigation */}
-      <MobileNav currentView={view} onViewChange={setView} />
     </SidebarProvider>
   );
 }
