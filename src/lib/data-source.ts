@@ -20,10 +20,23 @@ import { type Note } from './types';
 // INTERFACES
 // ─────────────────────────────────────────────────────────────
 
+export interface AgentDetail {
+  agent: Agent;
+  workingMd: string | null;    // Raw markdown content
+  soulMd: string | null;       // Raw markdown content  
+  dailyNotes: DailyNote[];     // Recent daily notes
+}
+
+export interface DailyNote {
+  date: string;        // YYYY-MM-DD
+  content: string;     // Raw markdown
+}
+
 export interface DataSource {
   getAgents(): Promise<Agent[]>;
   getNotes(): Promise<Note[]>;
   getActivity(): Promise<Activity[]>;
+  getAgentDetail(agentId: string): Promise<AgentDetail | null>;
 }
 
 // Agent state from WORKING.md frontmatter
@@ -76,6 +89,140 @@ export class MockDataSource implements DataSource {
   async getActivity(): Promise<Activity[]> {
     return mockActivity;
   }
+
+  async getAgentDetail(agentId: string): Promise<AgentDetail | null> {
+    const agent = mockAgents.find(a => a.id === agentId);
+    if (!agent) return null;
+
+    // Mock WORKING.md content
+    const workingMd = `---
+id: ${agentId}
+status: ${agent.status}
+focus: ${agent.focus || 'None'}
+lastActive: ${agent.lastActive.toISOString()}
+---
+
+# WORKING.md - Current State
+
+## Status: ${agent.status === 'working' ? '🟢 Active' : agent.status === 'blocked' ? '🔴 Blocked' : '⚪ Idle'}
+
+## Current Focus
+${agent.focus || 'Awaiting assignment'}
+
+## Active Tasks
+- [ ] Primary task in progress
+- [ ] Secondary follow-up item
+- [x] Previously completed item
+
+## Blockers
+${agent.status === 'blocked' ? '- Waiting on external dependency' : '_None currently_'}
+
+## Recent Completions
+- Completed initial setup (yesterday)
+- Reviewed project requirements (2 days ago)
+`;
+
+    // Mock SOUL.md content
+    const soulMd = `---
+id: ${agentId}
+name: ${agent.name}
+emoji: "${agent.emoji}"
+role: ${agent.role}
+version: 1.0.0
+---
+
+# SOUL.md - ${agent.name}
+
+You're the **${agent.name}** ${agent.emoji}
+
+## Mission
+${getMockMission(agentId)}
+
+## Personality
+${getMockPersonality(agentId)}
+
+## Expertise Areas
+${getMockExpertise(agentId)}
+
+## Communication Style
+- Evidence-based approach
+- Clear and concise updates
+- Proactive problem identification
+
+## Values
+- Quality over speed
+- Continuous improvement
+- Team collaboration
+`;
+
+    // Mock daily notes
+    const today = new Date();
+    const dailyNotes: DailyNote[] = [];
+    
+    for (let i = 0; i < 5; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      dailyNotes.push({
+        date: dateStr,
+        content: `# Daily Notes - ${dateStr}
+
+## Morning
+- Started work on ${agent.focus || 'project tasks'}
+- Reviewed overnight updates
+
+## Progress
+- Made progress on primary objectives
+- Addressed blocking issues
+
+## Notes
+- Context for tomorrow: continue current focus
+`,
+      });
+    }
+
+    return {
+      agent,
+      workingMd,
+      soulMd,
+      dailyNotes,
+    };
+  }
+}
+
+// Helper functions for mock data
+function getMockMission(agentId: string): string {
+  const missions: Record<string, string> = {
+    bam: 'Architect and guide the AI agent ecosystem, ensuring seamless collaboration between agents.',
+    eight: 'Build and maintain dealership integrations with pixel-perfect attention to detail.',
+    murphie: 'Ensure quality through comprehensive testing, visual regression, and automated QA.',
+    daily: 'Synthesize information from multiple sources into actionable daily briefings.',
+    intel: 'Research, analyze, and provide strategic intelligence on competitors and markets.',
+  };
+  return missions[agentId] || 'Support the team with specialized capabilities.';
+}
+
+function getMockPersonality(agentId: string): string {
+  const personalities: Record<string, string> = {
+    bam: '- Strategic thinker\\n- Systems architect\\n- Collaborative leader',
+    eight: '- Detail-oriented\\n- Dealership domain expert\\n- Integration specialist',
+    murphie: '- Quality obsessed\\n- Visual-first mindset\\n- Thorough and methodical',
+    daily: '- Information synthesizer\\n- Clear communicator\\n- Early riser',
+    intel: '- Analytical mind\\n- Research-driven\\n- Pattern recognition',
+  };
+  return personalities[agentId] || '- Dedicated team member\\n- Problem solver\\n- Continuous learner';
+}
+
+function getMockExpertise(agentId: string): string {
+  const expertise: Record<string, string> = {
+    bam: '- AI Architecture\\n- Agent Coordination\\n- System Design',
+    eight: '- GA4 Integration\\n- Dealership Systems\\n- Web Development',
+    murphie: '- Visual Testing\\n- Playwright/Puppeteer\\n- QA Automation',
+    daily: '- Information Synthesis\\n- Report Generation\\n- Calendar Integration',
+    intel: '- Market Research\\n- Competitive Analysis\\n- Data Mining',
+  };
+  return expertise[agentId] || '- General Development\\n- Problem Solving\\n- Documentation';
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -276,6 +423,58 @@ export class GitHubDataSource implements DataSource {
       console.warn(`Activity log for ${monthKey} not found`);
       return [];
     }
+  }
+
+  async getAgentDetail(agentId: string): Promise<AgentDetail | null> {
+    // First get the basic agent info
+    const agents = await this.getAgents();
+    const agent = agents.find(a => a.id === agentId);
+    if (!agent) return null;
+
+    // Fetch WORKING.md
+    let workingMd: string | null = null;
+    try {
+      workingMd = await this.fetchRaw(`agents/${agentId}/WORKING.md`);
+    } catch {
+      console.warn(`WORKING.md not found for agent ${agentId}`);
+    }
+
+    // Fetch SOUL.md
+    let soulMd: string | null = null;
+    try {
+      soulMd = await this.fetchRaw(`agents/${agentId}/SOUL.md`);
+    } catch {
+      console.warn(`SOUL.md not found for agent ${agentId}`);
+    }
+
+    // Fetch daily notes from shared/memory/
+    const dailyNotes: DailyNote[] = [];
+    try {
+      const memoryFiles = await this.fetchDirectory('shared/memory');
+      const mdFiles = memoryFiles
+        .filter(f => f.name.match(/^\d{4}-\d{2}-\d{2}\.md$/))
+        .sort((a, b) => b.name.localeCompare(a.name))
+        .slice(0, 7); // Last 7 days
+
+      for (const file of mdFiles) {
+        try {
+          const content = await this.fetchRaw(file.path);
+          const date = file.name.replace('.md', '');
+          dailyNotes.push({ date, content });
+        } catch {
+          console.warn(`Could not load daily note ${file.name}`);
+        }
+      }
+    } catch {
+      console.warn('Could not load daily notes');
+    }
+
+    return {
+      agent,
+      workingMd,
+      soulMd,
+      dailyNotes,
+    };
   }
 
   // ───────────────────────────────────────────────────────────
