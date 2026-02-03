@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { KanbanBoard } from './kanban-board';
+import { useState } from 'react';
+import { NotesView } from './notes-view';
 import { SquadDashboard } from './mission-control/squad-dashboard';
 import { AppSidebar, NavView } from './app-sidebar';
 import { MobileNav } from './mobile-nav';
@@ -17,15 +17,67 @@ import { MockDataSource } from '@/lib/data-source';
 import type { AgentDetail } from '@/lib/data-source';
 import type { SearchResult } from '@/lib/search';
 
-// Placeholder components for upcoming views
-function ActivityView() {
+type View = 'notes' | 'mission-control';
+
+export function AppShell() {
+  const [view, setView] = useState<View>('notes');
+
   return (
-    <div className="flex flex-1 items-center justify-center p-8">
-      <div className="text-center">
-        <span className="text-6xl mb-4 block">📊</span>
-        <h2 className="font-mono text-lg font-bold tracking-wider uppercase mb-2">Activity</h2>
-        <p className="text-muted-foreground font-mono text-sm">Coming soon...</p>
-      </div>
+    <div className="min-h-screen flex flex-col bg-background">
+      {/* Header with nav */}
+      <header className="sticky top-0 z-50 bg-background border-b border-border">
+        {/* Title bar */}
+        <div className="px-4 py-3 flex justify-between items-center">
+          <div>
+            <h1 className="font-mono text-sm font-bold tracking-[0.25em] uppercase">
+              {view === 'notes' ? 'PLAUD' : 'MISSION'}
+            </h1>
+            <span className="font-mono text-[10px] text-muted-foreground tracking-widest">
+              {view === 'notes' ? 'NOTES' : 'CONTROL'}
+            </span>
+          </div>
+          <ThemeToggle />
+        </div>
+
+        {/* View switcher */}
+        <div className="flex border-t border-border">
+          <button
+            onClick={() => setView('notes')}
+            className={cn(
+              'flex-1 py-2.5 font-mono text-[10px] uppercase tracking-widest transition-colors',
+              'border-b-2',
+              view === 'notes'
+                ? 'border-b-donnie text-foreground'
+                : 'border-b-transparent text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <span className={cn('w-2 h-2 inline-block mr-2', view === 'notes' ? 'bg-donnie' : 'bg-muted-foreground')} />
+            Notes
+          </button>
+          <button
+            onClick={() => setView('mission-control')}
+            className={cn(
+              'flex-1 py-2.5 font-mono text-[10px] uppercase tracking-widest transition-colors',
+              'border-b-2',
+              view === 'mission-control'
+                ? 'border-b-raph text-foreground'
+                : 'border-b-transparent text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <span className={cn('w-2 h-2 inline-block mr-2', view === 'mission-control' ? 'bg-raph' : 'bg-muted-foreground')} />
+            Mission Control
+          </button>
+        </div>
+      </header>
+
+      {/* Main content */}
+      <main className="flex-1 overflow-hidden">
+        {view === 'notes' ? (
+          <NotesView embedded />
+        ) : (
+          <SquadDashboard />
+        )}
+      </main>
     </div>
   );
 }

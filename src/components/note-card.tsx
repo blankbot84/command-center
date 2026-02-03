@@ -10,6 +10,16 @@ interface NoteCardProps {
   onClick: () => void;
 }
 
+function formatDuration(seconds?: number): string {
+  if (!seconds) return '';
+  if (seconds < 60) return `${seconds}s`;
+  const mins = Math.floor(seconds / 60);
+  if (mins < 60) return `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  const remainingMins = mins % 60;
+  return remainingMins > 0 ? `${hrs}h ${remainingMins}m` : `${hrs}h`;
+}
+
 export function NoteCard({ note, onClick }: NoteCardProps) {
   const {
     attributes,
@@ -26,6 +36,7 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
   };
 
   const pendingTasks = note.actions.filter(a => !a.done).length;
+  const duration = formatDuration(note.duration);
 
   return (
     <div
@@ -42,11 +53,39 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
         isDragging && 'opacity-50 shadow-lg'
       )}
     >
-      <h3 className="text-sm font-medium mb-3 line-clamp-2 leading-snug">
+      <h3 className="text-sm font-medium mb-2 line-clamp-2 leading-snug">
         {note.title}
       </h3>
+      
+      {/* Tags preview */}
+      {note.takeaways.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-2">
+          {note.takeaways.slice(0, 2).map((tag, i) => (
+            <span 
+              key={i}
+              className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider bg-accent/50 px-1.5 py-0.5"
+            >
+              {tag}
+            </span>
+          ))}
+          {note.takeaways.length > 2 && (
+            <span className="font-mono text-[9px] text-muted-foreground">
+              +{note.takeaways.length - 2}
+            </span>
+          )}
+        </div>
+      )}
+      
       <div className="flex justify-between items-center font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-        <span>{note.date}</span>
+        <div className="flex items-center gap-2">
+          <span>{note.date}</span>
+          {duration && (
+            <>
+              <span className="text-border">•</span>
+              <span>{duration}</span>
+            </>
+          )}
+        </div>
         {pendingTasks > 0 && (
           <span className="bg-raph text-white px-2 py-1 font-bold">
             {pendingTasks}

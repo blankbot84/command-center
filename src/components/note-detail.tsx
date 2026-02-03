@@ -20,8 +20,20 @@ interface NoteDetailProps {
   onToggleAction: (noteId: string, actionIndex: number) => void;
 }
 
+function formatDuration(seconds?: number): string {
+  if (!seconds) return '';
+  if (seconds < 60) return `${seconds}s`;
+  const mins = Math.floor(seconds / 60);
+  if (mins < 60) return `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  const remainingMins = mins % 60;
+  return remainingMins > 0 ? `${hrs}h ${remainingMins}m` : `${hrs}h`;
+}
+
 export function NoteDetail({ note, open, onClose, onMove, onToggleAction }: NoteDetailProps) {
   if (!note) return null;
+
+  const duration = formatDuration(note.duration);
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
@@ -32,22 +44,35 @@ export function NoteDetail({ note, open, onClose, onMove, onToggleAction }: Note
         {/* Fixed Header */}
         <SheetHeader className="p-4 md:p-6 pb-4 flex-shrink-0 border-b border-border">
           <div className="space-y-2">
-            <Badge
-              className={cn(
-                'font-mono text-[9px] uppercase tracking-widest rounded-none px-2.5 py-1',
-                note.type === 'voice'
-                  ? 'bg-donnie text-white hover:bg-donnie'
-                  : 'bg-mikey text-white hover:bg-mikey'
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge
+                className={cn(
+                  'font-mono text-[9px] uppercase tracking-widest rounded-none px-2.5 py-1',
+                  note.type === 'voice'
+                    ? 'bg-donnie text-white hover:bg-donnie'
+                    : 'bg-mikey text-white hover:bg-mikey'
+                )}
+              >
+                {note.type}
+              </Badge>
+              {duration && (
+                <Badge variant="outline" className="font-mono text-[9px] uppercase tracking-widest rounded-none px-2.5 py-1">
+                  {duration}
+                </Badge>
               )}
-            >
-              {note.type}
-            </Badge>
+            </div>
             <SheetTitle className="text-lg md:text-xl font-semibold leading-tight text-left">
               {note.title}
             </SheetTitle>
-            <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-              {note.date}
-            </p>
+            <div className="flex items-center gap-3 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+              <span>{note.date}</span>
+              {note.participants && note.participants.length > 0 && (
+                <>
+                  <span className="text-border">•</span>
+                  <span>{note.participants.join(', ')}</span>
+                </>
+              )}
+            </div>
           </div>
         </SheetHeader>
 
@@ -62,20 +87,23 @@ export function NoteDetail({ note, open, onClose, onMove, onToggleAction }: Note
               <p className="text-sm md:text-[15px] leading-relaxed">{note.synopsis}</p>
             </section>
 
-            {/* Takeaways */}
+            {/* Tags */}
             {note.takeaways.length > 0 && (
               <section>
                 <h4 className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mb-2 font-bold">
-                  Takeaways
+                  Tags
                 </h4>
-                <ul className="space-y-0">
-                  {note.takeaways.map((t, i) => (
-                    <li key={i} className="py-3 border-b border-border text-sm leading-snug">
-                      <span className="text-muted-foreground mr-2">—</span>
-                      {t}
-                    </li>
+                <div className="flex flex-wrap gap-2">
+                  {note.takeaways.map((tag, i) => (
+                    <Badge
+                      key={i}
+                      variant="outline"
+                      className="font-mono text-[10px] uppercase tracking-widest rounded-none px-2.5 py-1"
+                    >
+                      {tag}
+                    </Badge>
                   ))}
-                </ul>
+                </div>
               </section>
             )}
 
