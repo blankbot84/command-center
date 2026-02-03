@@ -32,6 +32,30 @@ export function SquadDashboard() {
   const [agentDetail, setAgentDetail] = useState<AgentDetail | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [squadViewMode, setSquadViewMode] = useState<SquadViewMode>('overview');
+  
+  // Activity state
+  const [activities, setActivities] = useState<Activity[]>(mockActivity);
+  const [isLoadingActivities, setIsLoadingActivities] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+
+  // Fetch activities from data source
+  const fetchActivities = useCallback(async () => {
+    setIsLoadingActivities(true);
+    try {
+      const data = await dataSource.getActivity();
+      setActivities(data);
+      setLastRefresh(new Date());
+    } catch (error) {
+      console.error('Failed to fetch activities:', error);
+    } finally {
+      setIsLoadingActivities(false);
+    }
+  }, []);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchActivities();
+  }, [fetchActivities]);
 
   // Fetch agent detail when an agent is selected
   const fetchAgentDetail = useCallback(async (agent: Agent) => {
