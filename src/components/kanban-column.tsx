@@ -26,8 +26,7 @@ export function KanbanColumn({ id, label, notes, onNoteClick }: KanbanColumnProp
   return (
     <div
       className={cn(
-        'flex-shrink-0 w-[280px] md:w-60 bg-card flex flex-col min-h-[200px] max-h-[400px] md:max-h-[280px]',
-        'snap-start'
+        'flex-shrink-0 w-[280px] md:w-60 bg-card flex flex-col min-h-[200px] max-h-[400px] md:max-h-[280px]'
       )}
     >
       <div className="p-3 border-b border-border flex justify-between items-center">

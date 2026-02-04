@@ -48,7 +48,7 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
       className={cn(
         'bg-background border border-border p-4 cursor-grab active:cursor-grabbing',
         'hover:border-muted-foreground transition-all duration-150',
-        'border-l-[3px] touch-manipulation',
+        'border-l-[3px] touch-manipulation overflow-anchor-none',
         note.type === 'voice' ? 'border-l-donnie' : 'border-l-mikey',
         isDragging && 'opacity-50 shadow-lg'
       )}

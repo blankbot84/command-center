@@ -134,7 +134,7 @@ export function NotesView({ embedded }: NotesViewProps) {
   const renderKanbanRow = (type: NoteType) => {
     const typeNotes = notes.filter(n => n.type === type);
     return (
-      <div className="flex gap-3 md:gap-4 p-3 md:p-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-20 md:pb-4">
+      <div className="flex gap-3 md:gap-4 p-3 md:p-4 overflow-x-auto scrollbar-hide pb-20 md:pb-4 overscroll-x-contain scroll-touch">
         {COLUMNS.map(col => (
           <KanbanColumn
             key={`${type}-${col.id}`}

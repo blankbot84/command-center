@@ -264,8 +264,17 @@
     overscroll-behavior: contain;
   }
 
+  .overscroll-x-contain {
+    overscroll-behavior-x: contain;
+  }
+
   .overscroll-none {
     overscroll-behavior: none;
+  }
+
+  /* Prevent element from being a scroll anchor */
+  .overflow-anchor-none {
+    overflow-anchor: none;
   }
 
   /* Momentum scrolling for iOS */
