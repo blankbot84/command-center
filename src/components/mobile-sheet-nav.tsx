@@ -13,12 +13,12 @@ import {
 } from '@/components/ui/sheet';
 
 const navItems: { id: NavView; label: string; icon: string; color: string }[] = [
+  { id: 'chat', label: 'Chat', icon: '💬', color: 'text-emerald-400' },
+  { id: 'memory', label: 'Memory', icon: '🧠', color: 'text-purple-400' },
+  { id: 'activity', label: 'Activity', icon: '📊', color: 'text-leo' },
+  { id: 'search', label: 'Search', icon: '🔍', color: 'text-mikey' },
   { id: 'notes', label: 'Notes', icon: '📝', color: 'text-donnie' },
   { id: 'squad', label: 'Squad', icon: '🤖', color: 'text-raph' },
-  { id: 'activity', label: 'Activity', icon: '📊', color: 'text-leo' },
-  { id: 'memory', label: 'Memory', icon: '🧠', color: 'text-purple-400' },
-  { id: 'chat', label: 'Chat', icon: '💬', color: 'text-emerald-400' },
-  { id: 'search', label: 'Search', icon: '🔍', color: 'text-mikey' },
   { id: 'settings', label: 'Settings', icon: '⚙️', color: 'text-muted-foreground' },
 ];
 

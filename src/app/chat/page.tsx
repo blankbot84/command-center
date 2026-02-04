@@ -1,4 +1,4 @@
-import { Chat } from '@/components/chat';
+import { AppShell } from '@/components/app-shell';
 
 export const metadata = {
   title: 'Chat - Command Center',
@@ -6,9 +6,5 @@ export const metadata = {
 };
 
 export default function ChatPage() {
-  return (
-    <main className="h-screen">
-      <Chat />
-    </main>
-  );
+  return <AppShell defaultView="chat" />;
 }

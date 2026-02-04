@@ -160,8 +160,12 @@ const viewTitles: Record<NavView, { title: string; subtitle: string; color: stri
   settings: { title: 'SETTINGS', subtitle: 'CONFIG', color: 'text-muted-foreground' },
 };
 
-export function AppShell() {
-  const [view, setView] = useState<NavView>('notes');
+interface AppShellProps {
+  defaultView?: NavView;
+}
+
+export function AppShell({ defaultView = 'notes' }: AppShellProps) {
+  const [view, setView] = useState<NavView>(defaultView);
   const currentTitle = viewTitles[view];
 
   // Global ⌘K shortcut to jump to search from anywhere
