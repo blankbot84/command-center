@@ -204,10 +204,10 @@ export function AppShell({ defaultView = 'notes' }: AppShellProps) {
   return (
     <SidebarProvider defaultOpen={true}>
       <AppSidebar currentView={view} onViewChange={setView} />
-      <SidebarInset>
-        <div className="flex min-h-screen flex-col">
+      <SidebarInset className="h-screen-dynamic">
+        <div className="flex h-full flex-col">
           {/* Header */}
-          <header className="sticky top-0 z-50 flex h-14 items-center gap-4 border-b border-border bg-background px-4">
+          <header className="flex-shrink-0 sticky top-0 z-50 flex h-14 items-center gap-4 border-b border-border bg-background px-4">
             {/* Mobile hamburger menu */}
             <MobileSheetNav currentView={view} onViewChange={setView} />
             {/* Desktop sidebar trigger */}
@@ -224,7 +224,7 @@ export function AppShell({ defaultView = 'notes' }: AppShellProps) {
             </div>
           </header>
 
-          {/* Main content - full height, no bottom nav padding needed */}
+          {/* Main content - fills remaining height */}
           <main className="flex-1 overflow-hidden">
             {renderView()}
           </main>

@@ -215,14 +215,17 @@ export function Chat() {
   if (!isLoaded) {
     return (
       <div className="flex flex-col h-full">
-        <div className="border-b px-4 py-2">
+        <div className="flex-shrink-0 border-b px-4 py-2">
           <div className="h-12 bg-muted/30 rounded animate-pulse" />
         </div>
-        <div className="flex-1 p-4">
+        <div className="flex-1 overflow-y-auto p-4">
           <div className="space-y-4 max-w-3xl mx-auto">
             <div className="h-20 bg-muted/20 rounded animate-pulse" />
             <div className="h-20 bg-muted/20 rounded animate-pulse ml-auto w-2/3" />
           </div>
+        </div>
+        <div className="flex-shrink-0 border-t bg-background p-4">
+          <div className="h-10 bg-muted/30 rounded animate-pulse max-w-3xl mx-auto" />
         </div>
       </div>
     );
@@ -230,8 +233,8 @@ export function Chat() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header with agent info */}
-      <div className="border-b px-4 py-2">
+      {/* Header with agent info - fixed at top */}
+      <div className="flex-shrink-0 border-b px-4 py-2">
         <ConversationHeader
           agent={activeAgent ? {
             emoji: activeAgent.emoji,
@@ -242,8 +245,11 @@ export function Chat() {
         />
       </div>
 
-      {/* Messages area */}
-      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+      {/* Messages area - scrollable, takes remaining space */}
+      <div 
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto overscroll-contain p-4"
+      >
         <div className="space-y-4 max-w-3xl mx-auto">
           {messages.length === 0 && activeAgent && (
             <div className="text-center text-muted-foreground py-12">
@@ -269,10 +275,13 @@ export function Chat() {
             <TypingIndicator />
           )}
         </div>
-      </ScrollArea>
+      </div>
 
-      {/* Input area */}
-      <div className="border-t bg-background p-4">
+      {/* Input area - fixed at bottom, never scrolls away */}
+      <div 
+        className="flex-shrink-0 border-t bg-background p-4 safe-area-bottom"
+        style={{ paddingBottom: keyboardHeight > 0 ? keyboardHeight + 16 : undefined }}
+      >
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto flex gap-2">
           <Input
             value={input}
