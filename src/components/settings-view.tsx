@@ -175,8 +175,8 @@ export function SettingsView() {
         >
           <ToggleButton
             options={[
-              { value: 'mock', label: 'Mock Data', icon: <Package className="h-4 w-4" /> },
-              { value: 'github', label: 'GitHub', icon: <Github className="h-4 w-4" /> },
+              { value: 'mock', label: 'Mock Data', icon: <Package className="h-4 w-4 text-orange-500" /> },
+              { value: 'github', label: 'GitHub', icon: <Github className="h-4 w-4 text-purple-500" /> },
             ]}
             value={settings.dataSource}
             onChange={(v) => updateSettings({ dataSource: v as 'mock' | 'github' })}
@@ -196,7 +196,7 @@ export function SettingsView() {
           description="Source repository for live data"
         >
           <div className="flex items-center gap-2 bg-secondary/50 px-3 py-2 border border-border">
-            <FolderOpen className="h-5 w-5 text-muted-foreground" />
+            <FolderOpen className="h-5 w-5 text-emerald-500" />
             <code className="font-mono text-sm">blankbot84/life-data</code>
           </div>
           <p className="font-mono text-[10px] text-muted-foreground">

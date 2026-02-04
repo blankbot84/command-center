@@ -23,13 +23,13 @@ import {
 } from '@/components/ui/sheet';
 
 const navItems: { id: NavView; label: string; icon: LucideIcon; color: string }[] = [
-  { id: 'chat', label: 'Chat', icon: MessageSquare, color: 'text-emerald-400' },
-  { id: 'memory', label: 'Memory', icon: Brain, color: 'text-purple-400' },
-  { id: 'activity', label: 'Activity', icon: Activity, color: 'text-leo' },
-  { id: 'search', label: 'Search', icon: Search, color: 'text-mikey' },
-  { id: 'notes', label: 'Notes', icon: FileText, color: 'text-donnie' },
-  { id: 'squad', label: 'Squad', icon: Users, color: 'text-raph' },
-  { id: 'settings', label: 'Settings', icon: Settings, color: 'text-muted-foreground' },
+  { id: 'chat', label: 'Chat', icon: MessageSquare, color: 'text-emerald-500' },
+  { id: 'memory', label: 'Memory', icon: Brain, color: 'text-purple-500' },
+  { id: 'activity', label: 'Activity', icon: Activity, color: 'text-blue-500' },
+  { id: 'search', label: 'Search', icon: Search, color: 'text-orange-500' },
+  { id: 'notes', label: 'Notes', icon: FileText, color: 'text-purple-400' },
+  { id: 'squad', label: 'Squad', icon: Users, color: 'text-red-500' },
+  { id: 'settings', label: 'Settings', icon: Settings, color: 'text-zinc-400' },
 ];
 
 interface MobileSheetNavProps {
@@ -74,7 +74,7 @@ export function MobileSheetNav({ currentView, onViewChange }: MobileSheetNavProp
                   currentView === item.id && 'bg-accent'
                 )}
               >
-                <item.icon className="h-5 w-5" />
+                <item.icon className={cn('h-5 w-5', item.color)} />
                 <div className="flex-1">
                   <span className={cn(
                     'font-mono text-sm font-medium uppercase tracking-wider',

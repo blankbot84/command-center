@@ -95,10 +95,10 @@ export function SearchBar({
             'hover:bg-secondary hover:text-foreground transition-colors'
           )}
         >
-          <Search className="w-3.5 h-3.5" />
+          <Search className="w-3.5 h-3.5 text-orange-500" />
           <span className="hidden sm:inline">Search</span>
           <kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 bg-background/50 border border-border text-[10px]">
-            <Command className="w-2.5 h-2.5" />
+            <Command className="w-2.5 h-2.5 text-blue-400" />
             <span>K</span>
           </kbd>
         </button>
@@ -110,7 +110,7 @@ export function SearchBar({
           <div className="w-full max-w-2xl bg-background border border-border shadow-lg">
             {/* Search input */}
             <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
-              <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              <Search className="w-4 h-4 text-orange-500 flex-shrink-0" />
               <input
                 ref={inputRef}
                 type="text"

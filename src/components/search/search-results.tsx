@@ -25,14 +25,14 @@ export function SearchResults({ groupedResults, onResultClick }: SearchResultsPr
       {hasNotes && (
         <ResultSection
           title="Notes"
-          icon={<FileText className="w-3.5 h-3.5" />}
+          icon={<FileText className="w-3.5 h-3.5 text-purple-500" />}
           color="donnie"
           results={notes}
           onResultClick={onResultClick}
           renderIcon={(result) => (
             result.metadata.noteType === 'voice' 
-              ? <Mic className="w-3.5 h-3.5 text-donnie" />
-              : <Users className="w-3.5 h-3.5 text-mikey" />
+              ? <Mic className="w-3.5 h-3.5 text-pink-500" />
+              : <Users className="w-3.5 h-3.5 text-orange-500" />
           )}
         />
       )}
@@ -41,14 +41,14 @@ export function SearchResults({ groupedResults, onResultClick }: SearchResultsPr
       {hasAgents && (
         <ResultSection
           title="Agents"
-          icon={<Bot className="w-3.5 h-3.5" />}
+          icon={<Bot className="w-3.5 h-3.5 text-emerald-500" />}
           color="leo"
           results={agents}
           onResultClick={onResultClick}
           renderIcon={(result) => (
             result.metadata.agentIcon 
-              ? <AgentIcon icon={result.metadata.agentIcon as AgentIconType} className="w-3.5 h-3.5" />
-              : <Bot className="w-3.5 h-3.5" />
+              ? <AgentIcon icon={result.metadata.agentIcon as AgentIconType} className="w-3.5 h-3.5" agentId={result.metadata.agentId as string} />
+              : <Bot className="w-3.5 h-3.5 text-emerald-500" />
           )}
         />
       )}
@@ -57,14 +57,14 @@ export function SearchResults({ groupedResults, onResultClick }: SearchResultsPr
       {hasDailyNotes && (
         <ResultSection
           title="Daily Notes"
-          icon={<Calendar className="w-3.5 h-3.5" />}
+          icon={<Calendar className="w-3.5 h-3.5 text-blue-500" />}
           color="mikey"
           results={dailyNotes}
           onResultClick={onResultClick}
           renderIcon={(result) => (
             result.metadata.agentIcon 
-              ? <AgentIcon icon={result.metadata.agentIcon as AgentIconType} className="w-3.5 h-3.5" />
-              : <Bot className="w-3.5 h-3.5" />
+              ? <AgentIcon icon={result.metadata.agentIcon as AgentIconType} className="w-3.5 h-3.5" agentId={result.metadata.agentId as string} />
+              : <Calendar className="w-3.5 h-3.5 text-blue-500" />
           )}
         />
       )}
@@ -73,11 +73,11 @@ export function SearchResults({ groupedResults, onResultClick }: SearchResultsPr
       {hasMemory && (
         <ResultSection
           title="Memory"
-          icon={<Brain className="w-3.5 h-3.5" />}
+          icon={<Brain className="w-3.5 h-3.5 text-purple-500" />}
           color="raph"
           results={memory}
           onResultClick={onResultClick}
-          renderIcon={() => <Brain className="w-3.5 h-3.5 text-raph" />}
+          renderIcon={() => <Brain className="w-3.5 h-3.5 text-purple-500" />}
         />
       )}
     </div>

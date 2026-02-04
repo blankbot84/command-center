@@ -41,7 +41,7 @@ function DailyNoteEntry({ date, content, defaultExpanded = false }: DailyNoteEnt
         )}
       >
         <div className="flex items-center gap-3">
-          <Calendar className="h-5 w-5 text-muted-foreground" />
+          <Calendar className="h-5 w-5 text-blue-500" />
           <div className="text-left">
             <div className="font-mono text-sm font-medium">
               {isToday ? 'Today' : isYesterday ? 'Yesterday' : date}
@@ -62,7 +62,7 @@ function DailyNoteEntry({ date, content, defaultExpanded = false }: DailyNoteEnt
           )}
           <ChevronDown
             className={cn(
-              'h-4 w-4 text-muted-foreground transition-transform duration-200',
+              'h-4 w-4 text-blue-400 transition-transform duration-200',
               isExpanded && 'rotate-180'
             )}
           />
@@ -155,7 +155,7 @@ export function MemoryView() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <Brain className="h-10 w-10 mx-auto mb-3 text-muted-foreground animate-pulse" />
+          <Brain className="h-10 w-10 mx-auto mb-3 text-purple-500 animate-pulse" />
           <span className="font-mono text-sm text-muted-foreground">Loading memory...</span>
         </div>
       </div>
@@ -291,7 +291,7 @@ export function MemoryView() {
           ) : (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <Inbox className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
+                <Inbox className="h-10 w-10 mx-auto mb-3 text-blue-400" />
                 <span className="font-mono text-sm text-muted-foreground">
                   No daily notes found
                 </span>

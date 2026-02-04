@@ -53,7 +53,7 @@ export function ConversationList({
             }}
             className="gap-1"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 text-emerald-500" />
             New Chat
           </Button>
         </SheetHeader>

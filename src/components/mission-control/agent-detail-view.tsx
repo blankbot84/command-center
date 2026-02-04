@@ -102,7 +102,7 @@ export function AgentDetailView({
                 )}
                 title="Refresh"
               >
-                <RefreshCw className="w-4 h-4 text-muted-foreground" />
+                <RefreshCw className="w-4 h-4 text-blue-500" />
               </button>
             )}
             {onClose && (
@@ -111,7 +111,7 @@ export function AgentDetailView({
                 className="p-2 hover:bg-muted rounded transition-colors"
                 title="Close"
               >
-                <X className="w-4 h-4 text-muted-foreground" />
+                <X className="w-4 h-4 text-red-400" />
               </button>
             )}
           </div>
@@ -128,7 +128,7 @@ export function AgentDetailView({
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="flex items-center gap-2 text-muted-foreground">
-              <RefreshCw className="w-4 h-4 animate-spin" />
+              <RefreshCw className="w-4 h-4 animate-spin text-blue-500" />
               <span className="font-mono text-[10px] uppercase tracking-wider">Loading...</span>
             </div>
           </div>
@@ -152,9 +152,9 @@ export function AgentDetailView({
                 className="w-full p-4 flex items-center gap-2 hover:bg-muted/50 transition-colors text-left"
               >
                 {soulExpanded ? (
-                  <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                  <ChevronDown className="w-4 h-4 text-purple-400 flex-shrink-0" />
                 ) : (
-                  <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                  <ChevronRight className="w-4 h-4 text-purple-400 flex-shrink-0" />
                 )}
                 <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
                   SOUL.md

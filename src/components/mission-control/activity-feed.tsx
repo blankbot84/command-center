@@ -16,12 +16,12 @@ interface ActivityFeedProps {
 }
 
 const activityIcons: Record<Activity['type'], React.ReactNode> = {
-  task_created: <FileText className="h-4 w-4" />,
-  task_assigned: <User className="h-4 w-4" />,
-  status_changed: <RefreshCw className="h-4 w-4" />,
-  comment_posted: <MessageSquare className="h-4 w-4" />,
-  document_created: <File className="h-4 w-4" />,
-  agent_status: <Zap className="h-4 w-4" />,
+  task_created: <FileText className="h-4 w-4 text-emerald-500" />,
+  task_assigned: <User className="h-4 w-4 text-blue-500" />,
+  status_changed: <RefreshCw className="h-4 w-4 text-orange-500" />,
+  comment_posted: <MessageSquare className="h-4 w-4 text-purple-500" />,
+  document_created: <File className="h-4 w-4 text-pink-500" />,
+  agent_status: <Zap className="h-4 w-4 text-yellow-500" />,
 };
 
 // Fallback agent lookup for activities from daily notes
@@ -112,7 +112,7 @@ export function ActivityFeed({ activities, maxItems, isLoading, onRefresh, lastR
             </div>
 
             {/* Activity type icon */}
-            <span className="flex-shrink-0 opacity-50 text-muted-foreground" title={activity.type}>
+            <span className="flex-shrink-0" title={activity.type}>
               {activityIcons[activity.type]}
             </span>
           </div>

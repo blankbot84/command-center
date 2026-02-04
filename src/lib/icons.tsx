@@ -32,10 +32,12 @@ export function getIcon(name: string): LucideIcon {
  * Agent color mapping for icon backgrounds (TMNT-inspired)
  */
 export const agentColors: Record<string, { bg: string; text: string }> = {
-  'murphie': { bg: 'bg-purple-500/20', text: 'text-purple-400' },
-  'eight': { bg: 'bg-orange-500/20', text: 'text-orange-400' },
-  'console': { bg: 'bg-red-500/20', text: 'text-red-400' },
-  'daily': { bg: 'bg-blue-500/20', text: 'text-blue-400' },
+  'murphie': { bg: 'bg-purple-500/20', text: 'text-purple-500' },
+  'eight': { bg: 'bg-orange-500/20', text: 'text-orange-500' },
+  'console': { bg: 'bg-red-500/20', text: 'text-red-500' },
+  'daily': { bg: 'bg-blue-500/20', text: 'text-blue-500' },
+  'bam': { bg: 'bg-emerald-500/20', text: 'text-emerald-500' },
+  'intel': { bg: 'bg-blue-500/20', text: 'text-blue-500' },
 };
 
 /**

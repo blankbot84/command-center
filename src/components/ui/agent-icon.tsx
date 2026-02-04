@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 interface AgentIconProps {
   icon: AgentIconType;
   className?: string;
+  agentId?: string;
 }
 
 const iconMap = {
@@ -25,7 +26,33 @@ const iconMap = {
   search: Search,
 };
 
-export function AgentIcon({ icon, className }: AgentIconProps) {
+// Agent-specific icon colors (TMNT-inspired)
+const agentIconColors: Record<string, string> = {
+  'murphie': 'text-purple-500',
+  'eight': 'text-orange-500',
+  'console': 'text-red-500',
+  'daily': 'text-blue-500',
+  'bam': 'text-emerald-500',
+  'intel': 'text-blue-400',
+};
+
+// Icon-based fallback colors
+const iconColors: Record<string, string> = {
+  'flask-conical': 'text-purple-500',  // Murphie (QA)
+  'building2': 'text-orange-500',      // Eight (Dealership)
+  'terminal': 'text-emerald-500',      // Bam (Architect)
+  'newspaper': 'text-blue-500',        // Daily Brief
+  'search': 'text-blue-400',           // Intel
+  'bot': 'text-zinc-400',              // Default
+};
+
+export function AgentIcon({ icon, className, agentId }: AgentIconProps) {
   const IconComponent = iconMap[icon] || Bot;
-  return <IconComponent className={cn('h-5 w-5', className)} />;
+  
+  // Use agent-specific color if agentId provided, otherwise icon-based color
+  const colorClass = agentId 
+    ? agentIconColors[agentId] || iconColors[icon] || 'text-zinc-400'
+    : iconColors[icon] || 'text-zinc-400';
+  
+  return <IconComponent className={cn('h-5 w-5', colorClass, className)} />;
 }

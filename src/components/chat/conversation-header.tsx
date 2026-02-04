@@ -62,7 +62,7 @@ export function ConversationHeader({ agent, onTap, onNewChat, className }: Conve
           )}
           aria-label="New chat"
         >
-          <PenSquare className="h-5 w-5 text-muted-foreground" />
+          <PenSquare className="h-5 w-5 text-emerald-500" />
         </button>
       )}
       {!onNewChat && <div className="w-10" />}

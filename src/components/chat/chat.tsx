@@ -80,7 +80,7 @@ function WelcomeHero({ onSelectAgent }: { onSelectAgent: () => void }) {
     <div className="flex flex-col items-center justify-center flex-1 px-4 py-8">
       {/* App icon */}
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 mb-4">
-        <Sparkles className="h-8 w-8 text-white" />
+        <Sparkles className="h-8 w-8 text-white drop-shadow-glow" />
       </div>
       
       {/* Welcome text */}
@@ -328,7 +328,7 @@ export function Chat() {
               )}
               aria-label="Add attachment"
             >
-              <Plus className="h-5 w-5" />
+              <Plus className="h-5 w-5 text-emerald-400" />
             </button>
             
             {/* Input */}
@@ -361,7 +361,7 @@ export function Chat() {
               )}
               aria-label="Send message"
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-4 w-4 text-blue-500" />
             </button>
           </form>
           
