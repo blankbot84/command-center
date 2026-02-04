@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { Calendar, Brain, Inbox, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getDataSourceInstance } from '@/lib/data';
 import type { MemoryData } from '@/lib/data-source';
@@ -40,7 +41,7 @@ function DailyNoteEntry({ date, content, defaultExpanded = false }: DailyNoteEnt
         )}
       >
         <div className="flex items-center gap-3">
-          <span className="text-lg">📅</span>
+          <Calendar className="h-5 w-5 text-muted-foreground" />
           <div className="text-left">
             <div className="font-mono text-sm font-medium">
               {isToday ? 'Today' : isYesterday ? 'Yesterday' : date}
@@ -59,14 +60,12 @@ function DailyNoteEntry({ date, content, defaultExpanded = false }: DailyNoteEnt
               {isToday ? 'Today' : 'Yesterday'}
             </span>
           )}
-          <span
+          <ChevronDown
             className={cn(
-              'text-muted-foreground transition-transform duration-200',
+              'h-4 w-4 text-muted-foreground transition-transform duration-200',
               isExpanded && 'rotate-180'
             )}
-          >
-            ▼
-          </span>
+          />
         </div>
       </button>
 
@@ -156,7 +155,7 @@ export function MemoryView() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <span className="text-4xl mb-3 block animate-pulse">🧠</span>
+          <Brain className="h-10 w-10 mx-auto mb-3 text-muted-foreground animate-pulse" />
           <span className="font-mono text-sm text-muted-foreground">Loading memory...</span>
         </div>
       </div>
@@ -292,7 +291,7 @@ export function MemoryView() {
           ) : (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <span className="text-4xl mb-3 block">📭</span>
+                <Inbox className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
                 <span className="font-mono text-sm text-muted-foreground">
                   No daily notes found
                 </span>

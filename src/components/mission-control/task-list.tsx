@@ -2,6 +2,7 @@
 
 import { Task, getAgent, formatRelativeTime, TaskStatus, mockAgents } from '@/lib/mission-control-data';
 import { cn } from '@/lib/utils';
+import { AgentIcon } from '@/components/ui/agent-icon';
 
 interface TaskListProps {
   tasks: Task[];
@@ -93,10 +94,10 @@ export function TaskList({ tasks, onTaskClick }: TaskListProps) {
                 assignees.map(agent => (
                   <span
                     key={agent!.id}
-                    className="w-7 h-7 rounded-full bg-card border-2 border-background flex items-center justify-center text-sm"
+                    className="w-7 h-7 rounded-full bg-card border-2 border-background flex items-center justify-center"
                     title={agent!.name}
                   >
-                    {agent!.emoji}
+                    <AgentIcon icon={agent!.icon} className="h-4 w-4" />
                   </span>
                 ))
               ) : (

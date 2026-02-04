@@ -3,6 +3,8 @@
 import { FileText, Bot, Calendar, Brain, Mic, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { GroupedResults, SearchResult } from '@/lib/search';
+import { AgentIcon } from '@/components/ui/agent-icon';
+import type { AgentIcon as AgentIconType } from '@/lib/mission-control-data';
 
 interface SearchResultsProps {
   groupedResults: GroupedResults;
@@ -44,7 +46,9 @@ export function SearchResults({ groupedResults, onResultClick }: SearchResultsPr
           results={agents}
           onResultClick={onResultClick}
           renderIcon={(result) => (
-            <span className="text-sm">{result.metadata.agentEmoji}</span>
+            result.metadata.agentIcon 
+              ? <AgentIcon icon={result.metadata.agentIcon as AgentIconType} className="w-3.5 h-3.5" />
+              : <Bot className="w-3.5 h-3.5" />
           )}
         />
       )}
@@ -58,7 +62,9 @@ export function SearchResults({ groupedResults, onResultClick }: SearchResultsPr
           results={dailyNotes}
           onResultClick={onResultClick}
           renderIcon={(result) => (
-            <span className="text-xs">{result.metadata.agentEmoji}</span>
+            result.metadata.agentIcon 
+              ? <AgentIcon icon={result.metadata.agentIcon as AgentIconType} className="w-3.5 h-3.5" />
+              : <Bot className="w-3.5 h-3.5" />
           )}
         />
       )}

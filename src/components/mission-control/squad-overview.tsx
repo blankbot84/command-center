@@ -2,6 +2,7 @@
 
 import { Agent, formatRelativeTime } from '@/lib/mission-control-data';
 import { cn } from '@/lib/utils';
+import { AgentIcon } from '@/components/ui/agent-icon';
 
 interface SquadOverviewProps {
   agents: Agent[];
@@ -78,7 +79,7 @@ export function SquadOverview({ agents, onAgentClick }: SquadOverviewProps) {
             <div className="flex items-start gap-3">
               {/* Agent info */}
               <div className="flex items-center gap-2 min-w-[120px]">
-                <span className="text-lg">{agent.emoji}</span>
+                <AgentIcon icon={agent.icon} className="h-5 w-5" />
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-sm">{agent.name}</span>

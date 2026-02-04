@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Package, Github, FolderOpen } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 import { cn } from '@/lib/utils';
 
@@ -82,7 +83,7 @@ function ToggleButton({
   value,
   onChange,
 }: {
-  options: { value: string; label: string }[];
+  options: { value: string; label: string; icon?: React.ReactNode }[];
   value: string;
   onChange: (value: string) => void;
 }) {
@@ -93,12 +94,13 @@ function ToggleButton({
           key={opt.value}
           onClick={() => onChange(opt.value)}
           className={cn(
-            'flex-1 px-4 py-2 font-mono text-xs uppercase tracking-wider transition-colors',
+            'flex-1 px-4 py-2 font-mono text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2',
             value === opt.value
               ? 'bg-foreground text-background'
               : 'bg-background text-foreground hover:bg-accent'
           )}
         >
+          {opt.icon}
           {opt.label}
         </button>
       ))}
@@ -173,8 +175,8 @@ export function SettingsView() {
         >
           <ToggleButton
             options={[
-              { value: 'mock', label: '📦 Mock Data' },
-              { value: 'github', label: '🐙 GitHub' },
+              { value: 'mock', label: 'Mock Data', icon: <Package className="h-4 w-4" /> },
+              { value: 'github', label: 'GitHub', icon: <Github className="h-4 w-4" /> },
             ]}
             value={settings.dataSource}
             onChange={(v) => updateSettings({ dataSource: v as 'mock' | 'github' })}
@@ -194,7 +196,7 @@ export function SettingsView() {
           description="Source repository for live data"
         >
           <div className="flex items-center gap-2 bg-secondary/50 px-3 py-2 border border-border">
-            <span className="text-lg">📂</span>
+            <FolderOpen className="h-5 w-5 text-muted-foreground" />
             <code className="font-mono text-sm">blankbot84/life-data</code>
           </div>
           <p className="font-mono text-[10px] text-muted-foreground">

@@ -9,6 +9,8 @@ import type { Agent } from '@/lib/mission-control-data';
 import type { AgentDetail } from '@/lib/data-source';
 import type { SearchResult, GroupedResults } from '@/lib/search';
 import { FileText, Bot, Calendar, Brain, Mic, Users } from 'lucide-react';
+import { AgentIcon } from '@/components/ui/agent-icon';
+import type { AgentIcon as AgentIconType } from '@/lib/mission-control-data';
 
 interface InlineSearchProps {
   notes: Note[];
@@ -100,7 +102,7 @@ export function InlineSearch({
           </div>
         ) : query && resultCount === 0 ? (
           <div className="px-4 py-12 text-center">
-            <span className="text-4xl block mb-3">🔍</span>
+            <Search className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
             <span className="font-mono text-sm text-muted-foreground">
               No results for "{query}"
             </span>
@@ -112,7 +114,7 @@ export function InlineSearch({
           />
         ) : (
           <div className="px-4 py-12 text-center">
-            <span className="text-4xl block mb-3">🔍</span>
+            <Search className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
             <p className="font-mono text-sm text-muted-foreground mb-2">
               Search across everything
             </p>
@@ -169,7 +171,9 @@ function InlineResults({ groupedResults, onResultClick }: InlineResultsProps) {
           results={agents}
           onResultClick={onResultClick}
           renderIcon={(result) => (
-            <span className="text-base">{result.metadata.agentEmoji}</span>
+            result.metadata.agentIcon 
+              ? <AgentIcon icon={result.metadata.agentIcon as AgentIconType} className="w-4 h-4" />
+              : <Bot className="w-4 h-4" />
           )}
         />
       )}
@@ -182,7 +186,9 @@ function InlineResults({ groupedResults, onResultClick }: InlineResultsProps) {
           results={dailyNotes}
           onResultClick={onResultClick}
           renderIcon={(result) => (
-            <span className="text-sm">{result.metadata.agentEmoji}</span>
+            result.metadata.agentIcon 
+              ? <AgentIcon icon={result.metadata.agentIcon as AgentIconType} className="w-4 h-4" />
+              : <Bot className="w-4 h-4" />
           )}
         />
       )}

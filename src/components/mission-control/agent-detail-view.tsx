@@ -6,6 +6,7 @@ import { Agent, formatRelativeTime } from '@/lib/mission-control-data';
 import { AgentDetail, DailyNote } from '@/lib/data-source';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronRight, RefreshCw, X } from 'lucide-react';
+import { AgentIcon } from '@/components/ui/agent-icon';
 
 interface AgentDetailViewProps {
   agent: Agent;
@@ -66,7 +67,7 @@ export function AgentDetailView({
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <span className="text-3xl flex-shrink-0">{agent.emoji}</span>
+            <AgentIcon icon={agent.icon} className="h-8 w-8 flex-shrink-0" />
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-medium truncate">{agent.name}</h2>

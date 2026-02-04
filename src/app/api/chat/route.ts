@@ -7,14 +7,14 @@ export async function POST(req: Request) {
 
   // Mock AI response - personalized per agent
   const agentResponses: Record<string, string> = {
-    murphie: `Hey! Murphie here 🧪 You said: "${lastMessage?.content || 'nothing'}"\n\nI'm your QA specialist. Ready to help with testing, visual regression, and quality assurance. This is a mock response — real AI integration coming soon! 🚀`,
-    eight: `Eight here 🏢 You said: "${lastMessage?.content || 'nothing'}"\n\nI handle dealership development and business logic. Mock response for now — stay tuned for the real deal! 🚀`,
-    console: `Console reporting 💥 You said: "${lastMessage?.content || 'nothing'}"\n\nDevOps is my game. Deployments, builds, and infrastructure — I've got it covered. Mock response for now! 🚀`,
-    daily: `Daily Brief 📰 You said: "${lastMessage?.content || 'nothing'}"\n\nI synthesize information and provide strategic summaries. This is a mock response — real AI integration coming soon! 🚀`,
+    murphie: `Hey! Murphie here. You said: "${lastMessage?.content || 'nothing'}"\n\nI'm your QA specialist. Ready to help with testing, visual regression, and quality assurance. This is a mock response — real AI integration coming soon!`,
+    eight: `Eight here. You said: "${lastMessage?.content || 'nothing'}"\n\nI handle dealership development and business logic. Mock response for now — stay tuned for the real deal!`,
+    console: `Console reporting. You said: "${lastMessage?.content || 'nothing'}"\n\nDevOps is my game. Deployments, builds, and infrastructure — I've got it covered. Mock response for now!`,
+    daily: `Daily Brief. You said: "${lastMessage?.content || 'nothing'}"\n\nI synthesize information and provide strategic summaries. This is a mock response — real AI integration coming soon!`,
   };
 
   const mockResponse = agentResponses[agentId] || 
-    `Hello! I'm the Command Center AI assistant. You said: "${lastMessage?.content || 'nothing'}"\n\nThis is a mock response to verify the chat foundation is working correctly. The real AI integration will come in a future milestone. 🚀`;
+    `Hello! I'm the Command Center AI assistant. You said: "${lastMessage?.content || 'nothing'}"\n\nThis is a mock response to verify the chat foundation is working correctly. The real AI integration will come in a future milestone.`;
 
   // Create a streaming response that mimics the Vercel AI SDK format
   const encoder = new TextEncoder();

@@ -2,6 +2,7 @@
 
 import { Agent, formatRelativeTime } from '@/lib/mission-control-data';
 import { cn } from '@/lib/utils';
+import { AgentIcon } from '@/components/ui/agent-icon';
 
 interface AgentCardProps {
   agent: Agent;
@@ -40,7 +41,7 @@ export function AgentCard({ agent, onClick }: AgentCardProps) {
     >
       {/* Header row */}
       <div className="flex items-center gap-3 mb-3">
-        <span className="text-2xl">{agent.emoji}</span>
+        <AgentIcon icon={agent.icon} className="h-6 w-6" />
         <div className="flex-1 min-w-0">
           <h3 className="font-medium text-sm">{agent.name}</h3>
           <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider truncate">

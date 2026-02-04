@@ -1,7 +1,11 @@
 'use client';
 
-import { Activity, getAgent, formatRelativeTime, mockAgents } from '@/lib/mission-control-data';
+import { 
+  FileText, User, RefreshCw, MessageSquare, File, Zap, Bot
+} from 'lucide-react';
+import { Activity, getAgent, formatRelativeTime, mockAgents, type AgentIcon as AgentIconType } from '@/lib/mission-control-data';
 import { cn } from '@/lib/utils';
+import { AgentIcon } from '@/components/ui/agent-icon';
 
 interface ActivityFeedProps {
   activities: Activity[];
@@ -11,13 +15,13 @@ interface ActivityFeedProps {
   lastRefresh?: Date | null;
 }
 
-const activityIcons: Record<Activity['type'], string> = {
-  task_created: '📝',
-  task_assigned: '👤',
-  status_changed: '🔄',
-  comment_posted: '💬',
-  document_created: '📄',
-  agent_status: '⚡',
+const activityIcons: Record<Activity['type'], React.ReactNode> = {
+  task_created: <FileText className="h-4 w-4" />,
+  task_assigned: <User className="h-4 w-4" />,
+  status_changed: <RefreshCw className="h-4 w-4" />,
+  comment_posted: <MessageSquare className="h-4 w-4" />,
+  document_created: <File className="h-4 w-4" />,
+  agent_status: <Zap className="h-4 w-4" />,
 };
 
 // Fallback agent lookup for activities from daily notes
@@ -29,10 +33,11 @@ function getAgentFallback(agentId: string) {
   return {
     id: agentId,
     name: agentId.charAt(0).toUpperCase() + agentId.slice(1),
-    emoji: '🤖',
+    icon: 'bot' as AgentIconType,
     role: 'Agent',
     status: 'idle' as const,
     focus: null,
+    blockers: null,
     lastActive: new Date(),
     color: 'leo',
   };
@@ -85,9 +90,13 @@ export function ActivityFeed({ activities, maxItems, isLoading, onRefresh, lastR
               'hover:bg-accent/30 transition-colors'
             )}
           >
-            {/* Agent emoji */}
-            <span className="text-lg flex-shrink-0" title={agent.name}>
-              {agent.emoji}
+            {/* Agent icon */}
+            <span className="flex-shrink-0" title={agent.name}>
+              {agent.icon ? (
+                <AgentIcon icon={agent.icon} className="h-5 w-5" />
+              ) : (
+                <Bot className="h-5 w-5" />
+              )}
             </span>
 
             {/* Content */}
@@ -103,7 +112,7 @@ export function ActivityFeed({ activities, maxItems, isLoading, onRefresh, lastR
             </div>
 
             {/* Activity type icon */}
-            <span className="text-sm flex-shrink-0 opacity-50" title={activity.type}>
+            <span className="flex-shrink-0 opacity-50 text-muted-foreground" title={activity.type}>
               {activityIcons[activity.type]}
             </span>
           </div>

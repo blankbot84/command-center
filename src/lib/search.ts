@@ -26,7 +26,7 @@ export interface SearchResult {
     date?: string;
     noteType?: 'voice' | 'meeting';
     agentName?: string;
-    agentEmoji?: string;
+    agentIcon?: string;
   };
 }
 
@@ -85,7 +85,7 @@ export function buildSearchIndex(data: {
     items.push({
       id: `agent-${agent.id}`,
       type: 'agent',
-      title: `${agent.emoji} ${agent.name}`,
+      title: agent.name,
       content: [
         agent.name,
         agent.role,
@@ -96,7 +96,7 @@ export function buildSearchIndex(data: {
       metadata: {
         agentId: agent.id,
         agentName: agent.name,
-        agentEmoji: agent.emoji,
+        agentIcon: agent.icon,
       },
     });
 
@@ -106,12 +106,12 @@ export function buildSearchIndex(data: {
         items.push({
           id: `daily-${agent.id}-${daily.date}`,
           type: 'daily-note',
-          title: `${agent.emoji} ${agent.name} - ${daily.date}`,
+          title: `${agent.name} - ${daily.date}`,
           content: daily.content.toLowerCase(),
           metadata: {
             agentId: agent.id,
             agentName: agent.name,
-            agentEmoji: agent.emoji,
+            agentIcon: agent.icon,
             date: daily.date,
           },
         });

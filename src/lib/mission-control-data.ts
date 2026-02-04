@@ -2,11 +2,12 @@
 // Easy to swap for Convex later
 
 export type AgentStatus = 'idle' | 'working' | 'blocked';
+export type AgentIcon = 'bot' | 'flask-conical' | 'building2' | 'terminal' | 'newspaper' | 'search';
 
 export interface Agent {
   id: string;
   name: string;
-  emoji: string;
+  icon: AgentIcon;
   role: string;
   status: AgentStatus;
   focus: string | null;
@@ -52,7 +53,7 @@ export const mockAgents: Agent[] = [
   {
     id: 'bam',
     name: 'Bam',
-    emoji: '💥',
+    icon: 'terminal',
     role: 'AI Architect',
     status: 'idle',
     focus: null,
@@ -63,7 +64,7 @@ export const mockAgents: Agent[] = [
   {
     id: 'eight',
     name: 'Eight',
-    emoji: '🏢',
+    icon: 'building2',
     role: 'Dealership Dev',
     status: 'working',
     focus: 'GA4 integration for Sam Boswell',
@@ -74,7 +75,7 @@ export const mockAgents: Agent[] = [
   {
     id: 'murphie',
     name: 'Murphie',
-    emoji: '🧪',
+    icon: 'flask-conical',
     role: 'QA Specialist',
     status: 'working',
     focus: 'Visual regression test suite',
@@ -85,7 +86,7 @@ export const mockAgents: Agent[] = [
   {
     id: 'daily',
     name: 'Daily Brief',
-    emoji: '📰',
+    icon: 'newspaper',
     role: 'Strategic Synthesis',
     status: 'idle',
     focus: null,
@@ -96,7 +97,7 @@ export const mockAgents: Agent[] = [
   {
     id: 'intel',
     name: 'Molt Intel',
-    emoji: '🔍',
+    icon: 'search',
     role: 'Research & Analysis',
     status: 'blocked',
     focus: 'Competitor pricing analysis',

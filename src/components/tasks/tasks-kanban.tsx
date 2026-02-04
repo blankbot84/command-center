@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { AgentIcon } from '@/components/ui/agent-icon';
 import {
   Dialog,
   DialogContent,
@@ -82,10 +83,10 @@ function TaskCard({ task, onClick }: TaskCardProps) {
             assignees.slice(0, 3).map(agent => (
               <span
                 key={agent!.id}
-                className="w-6 h-6 rounded-full bg-card border-2 border-background flex items-center justify-center text-xs"
+                className="w-6 h-6 rounded-full bg-card border-2 border-background flex items-center justify-center"
                 title={agent!.name}
               >
-                {agent!.emoji}
+                <AgentIcon icon={agent!.icon} className="h-3.5 w-3.5" />
               </span>
             ))
           ) : (
@@ -204,7 +205,7 @@ function TaskDetail({ task, open, onClose }: TaskDetailProps) {
                     key={agent!.id}
                     className="flex items-center gap-2 px-2 py-1 bg-accent rounded"
                   >
-                    <span className="text-sm">{agent!.emoji}</span>
+                    <AgentIcon icon={agent!.icon} className="h-4 w-4" />
                     <span className="text-sm">{agent!.name}</span>
                   </div>
                 ))
@@ -304,7 +305,7 @@ function FilterControls({
               )}
               title={agent.name}
             >
-              {agent.emoji}
+              <AgentIcon icon={agent.icon} className="h-4 w-4" />
             </button>
           ))}
         </div>

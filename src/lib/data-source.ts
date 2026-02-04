@@ -138,7 +138,7 @@ interface AgentWorkingState {
 // Agent registry from _registry.yaml
 interface AgentRegistryEntry {
   name: string;
-  emoji: string;
+  icon: string;
   role: string;
   color: string;
   model?: string;
@@ -308,14 +308,14 @@ ${agent.status === 'blocked' ? '- Waiting on external dependency' : '_None curre
     const soulMd = `---
 id: ${agentId}
 name: ${agent.name}
-emoji: "${agent.emoji}"
+icon: "${agent.icon}"
 role: ${agent.role}
 version: 1.0.0
 ---
 
 # SOUL.md - ${agent.name}
 
-You're the **${agent.name}** ${agent.emoji}
+You're **${agent.name}**
 
 ## Mission
 ${getMockMission(agentId)}
@@ -406,7 +406,7 @@ ${i === 0 ? 'Productive day overall. Made good progress on the main project.' : 
       });
     }
 
-    const memoryMd = `# 🧠 MEMORY.md - Long-Term Memory
+    const memoryMd = `# MEMORY.md - Long-Term Memory
 
 ## Who I Am
 I'm **Murphie** 🐢 — Quality assurance specialist and testing automation expert for the agent squad.
@@ -422,7 +422,7 @@ I'm **Murphie** 🐢 — Quality assurance specialist and testing automation exp
 ### The Squad
 - **Eight** 🎱 - Dealership integrations specialist
 - **Daily** ☀️ - Morning briefings and daily digests
-- **Intel** 🔍 - Research and competitive analysis
+- **Intel** - Research and competitive analysis
 
 ## Important Lessons Learned
 1. Always run visual regression tests before PR reviews
@@ -600,7 +600,7 @@ export class GitHubDataSource implements DataSource {
         const agent: Agent = {
           id: folder.name,
           name: regEntry?.name || this.capitalize(folder.name),
-          emoji: regEntry?.emoji || '🤖',
+          icon: (regEntry?.icon || 'bot') as import('./mission-control-data').AgentIcon,
           role: regEntry?.role || 'Agent',
           status: this.mapStatus(state.status),
           focus: parsed.focus || state.focus || null,
@@ -714,7 +714,7 @@ export class GitHubDataSource implements DataSource {
    * 1. Timestamped entries: ## 14:32 followed by content
    * 2. Tagged entries: - [type] Description
    * 3. Section headers with status indicators: ## Section Title
-   * 4. Checkboxes: - [x] Completed item or - ✅ Item
+   * 4. Checkboxes: - [x] Completed item
    */
   private parseDailyNoteActivities(content: string, date: string): Activity[] {
     const activities: Activity[] = [];
@@ -766,8 +766,8 @@ export class GitHubDataSource implements DataSource {
         continue;
       }
       
-      // Check for completed items: - [x] Item or - ✅ Item
-      const completedMatch = trimmed.match(/^[-*]\s+(?:\[x\]|✅)\s+(.+)$/i);
+      // Check for completed items: - [x] Item
+      const completedMatch = trimmed.match(/^[-*]\s+\[x\]\s+(.+)$/i);
       if (completedMatch) {
         activities.push(this.createActivityFromLine(
           `Completed: ${completedMatch[1]}`,
@@ -1037,7 +1037,7 @@ export class GitHubDataSource implements DataSource {
         currentAgent = agentMatch[1];
         result[currentAgent] = {
           name: '',
-          emoji: '',
+          icon: 'bot',
           role: '',
           color: '',
         };
@@ -1053,7 +1053,7 @@ export class GitHubDataSource implements DataSource {
           const value = rawValue.replace(/^["']|["']$/g, '');
           
           if (key === 'name') result[currentAgent].name = value;
-          else if (key === 'emoji') result[currentAgent].emoji = value;
+          else if (key === 'icon') result[currentAgent].icon = value;
           else if (key === 'role') result[currentAgent].role = value;
           else if (key === 'color') result[currentAgent].color = value;
           else if (key === 'model') result[currentAgent].model = value;
