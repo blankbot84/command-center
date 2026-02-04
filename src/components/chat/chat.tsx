@@ -26,9 +26,25 @@ export function Chat() {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
     
-    const message = input;
+    const text = input;
     setInput('');
-    await sendMessage({ text: message });
+    await sendMessage({ text });
+  };
+
+  // Helper to extract text content from message
+  const getMessageContent = (message: typeof messages[number]): string => {
+    // Handle parts array (AI SDK v5 format)
+    if ('parts' in message && Array.isArray(message.parts)) {
+      return message.parts
+        .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
+        .map(part => part.text)
+        .join('');
+    }
+    // Fallback to content string
+    if ('content' in message && typeof message.content === 'string') {
+      return message.content;
+    }
+    return '';
   };
 
   return (
@@ -42,20 +58,13 @@ export function Chat() {
               <p className="text-sm">Send a message to get started</p>
             </div>
           )}
-          {messages.map((message) => {
-            // Extract text from parts array (new AI SDK v5 format)
-            const textContent = message.parts
-              .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
-              .map(part => part.text)
-              .join('');
-            return (
-              <ChatMessage
-                key={message.id}
-                role={message.role as 'user' | 'assistant'}
-                content={textContent}
-              />
-            );
-          })}
+          {messages.map((message) => (
+            <ChatMessage
+              key={message.id}
+              role={message.role as 'user' | 'assistant'}
+              content={getMessageContent(message)}
+            />
+          ))}
           {isLoading && messages[messages.length - 1]?.role === 'user' && (
             <TypingIndicator />
           )}
