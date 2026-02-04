@@ -8,6 +8,7 @@ import { MemoryView } from './memory-view';
 import { SearchBar, InlineSearch } from './search';
 import { ThemeToggle } from './theme-toggle';
 import { SettingsView } from './settings-view';
+import { Chat } from './chat';
 import { cn } from '@/lib/utils';
 import { getDataSourceInstance } from '@/lib/data';
 import { AppSidebar, NavView } from './app-sidebar';
@@ -154,6 +155,7 @@ const viewTitles: Record<NavView, { title: string; subtitle: string; color: stri
   squad: { title: 'MISSION', subtitle: 'CONTROL', color: 'text-raph' },
   activity: { title: 'ACTIVITY', subtitle: 'LOG', color: 'text-leo' },
   memory: { title: 'MEMORY', subtitle: 'BANK', color: 'text-purple-400' },
+  chat: { title: 'AI', subtitle: 'CHAT', color: 'text-emerald-400' },
   search: { title: 'SEARCH', subtitle: 'ALL', color: 'text-mikey' },
   settings: { title: 'SETTINGS', subtitle: 'CONFIG', color: 'text-muted-foreground' },
 };
@@ -184,6 +186,8 @@ export function AppShell() {
         return <ActivityView />;
       case 'memory':
         return <MemoryView />;
+      case 'chat':
+        return <Chat />;
       case 'search':
         return <SearchView />;
       case 'settings':

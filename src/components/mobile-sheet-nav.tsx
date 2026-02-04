@@ -17,6 +17,7 @@ const navItems: { id: NavView; label: string; icon: string; color: string }[] = 
   { id: 'squad', label: 'Squad', icon: '🤖', color: 'text-raph' },
   { id: 'activity', label: 'Activity', icon: '📊', color: 'text-leo' },
   { id: 'memory', label: 'Memory', icon: '🧠', color: 'text-purple-400' },
+  { id: 'chat', label: 'Chat', icon: '💬', color: 'text-emerald-400' },
   { id: 'search', label: 'Search', icon: '🔍', color: 'text-mikey' },
   { id: 'settings', label: 'Settings', icon: '⚙️', color: 'text-muted-foreground' },
 ];
