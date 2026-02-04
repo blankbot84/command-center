@@ -9,7 +9,7 @@ import { AgentPicker } from './agent-picker';
 import { useConversations, generateMessageId } from './hooks/use-conversations';
 import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 import { chatAgents, getAgentById } from '@/lib/agents';
-import { Input } from '@/components/ui/input';
+import { ChatTextarea } from './chat-textarea';
 import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import type { ChatMessage as ChatMessageType } from '@/types/chat';
@@ -282,15 +282,26 @@ export function Chat() {
         className="flex-shrink-0 border-t bg-background p-4 safe-area-bottom"
         style={{ paddingBottom: keyboardHeight > 0 ? keyboardHeight + 16 : undefined }}
       >
-        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto flex gap-2">
-          <Input
+        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto flex gap-2 items-end">
+          <ChatTextarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={setInput}
+            onSubmit={() => {
+              if (input.trim() && !isLoading && activeConversation) {
+                handleSubmit({ preventDefault: () => {} } as React.FormEvent);
+              }
+            }}
             placeholder={activeAgent ? `Message ${activeAgent.name}...` : 'Select an agent to start...'}
             disabled={isLoading || !activeConversation}
             className="flex-1"
+            minHeight={44}
+            maxHeight={200}
           />
-          <Button type="submit" disabled={isLoading || !input.trim() || !activeConversation}>
+          <Button 
+            type="submit" 
+            disabled={isLoading || !input.trim() || !activeConversation}
+            className="h-11 w-11 shrink-0 rounded-lg"
+          >
             <Send className="h-4 w-4" />
             <span className="sr-only">Send</span>
           </Button>
