@@ -206,26 +206,31 @@ export function AppShell({ defaultView = 'notes' }: AppShellProps) {
       <AppSidebar currentView={view} onViewChange={setView} />
       <SidebarInset className="h-screen-dynamic">
         <div className="flex h-full flex-col">
-          {/* Header */}
-          <header className="flex-shrink-0 sticky top-0 z-50 flex h-14 items-center gap-4 border-b border-border bg-background px-4">
-            {/* Mobile hamburger menu */}
-            <MobileSheetNav currentView={view} onViewChange={setView} />
-            {/* Desktop sidebar trigger */}
-            <SidebarTrigger className="-ml-1 hidden md:flex" />
-            <div className="flex items-center gap-3">
-              <div>
-                <h1 className={cn('font-mono text-sm font-bold tracking-[0.25em] uppercase', currentTitle.color)}>
-                  {currentTitle.title}
-                </h1>
-                <span className="font-mono text-[10px] text-muted-foreground tracking-widest">
-                  {currentTitle.subtitle}
-                </span>
+          {/* Header - hidden for chat view since chat has its own */}
+          {view !== 'chat' && (
+            <header className="flex-shrink-0 sticky top-0 z-50 flex h-14 items-center gap-4 border-b border-border bg-background px-4">
+              {/* Mobile hamburger menu */}
+              <MobileSheetNav currentView={view} onViewChange={setView} />
+              {/* Desktop sidebar trigger */}
+              <SidebarTrigger className="-ml-1 hidden md:flex" />
+              <div className="flex items-center gap-3">
+                <div>
+                  <h1 className={cn('font-mono text-sm font-bold tracking-[0.25em] uppercase', currentTitle.color)}>
+                    {currentTitle.title}
+                  </h1>
+                  <span className="font-mono text-[10px] text-muted-foreground tracking-widest">
+                    {currentTitle.subtitle}
+                  </span>
+                </div>
               </div>
-            </div>
-          </header>
+            </header>
+          )}
 
           {/* Main content - fills remaining height */}
-          <main className="flex-1 min-h-0 overflow-hidden">
+          <main className={cn(
+            "flex-1 min-h-0",
+            view === 'chat' ? 'overflow-hidden' : 'overflow-hidden'
+          )}>
             {renderView()}
           </main>
         </div>

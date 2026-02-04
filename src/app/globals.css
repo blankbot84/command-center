@@ -326,7 +326,7 @@
  */
 
 .chat-container {
-  height: 100%;
+  height: 100dvh;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -356,15 +356,21 @@
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   min-height: 0;
+  /* Padding at bottom so content isn't hidden behind fixed input */
+  padding-bottom: 100px;
 }
 
 .chat-input-area {
-  flex: 0 0 auto;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
   padding: 12px 0;
   /* Safe area for iPhone home indicator */
   padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
-  /* Subtle gradient fade from content */
-  background: linear-gradient(to bottom, transparent, hsl(var(--background)) 8px);
+  /* Solid background so content doesn't show through */
+  background-color: hsl(var(--background));
 }
 
 /* ChatGPT-style pill input container */
