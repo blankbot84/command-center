@@ -310,87 +310,126 @@
 
 /*
  * ============================================================================
- * CHAT LAYOUT - Battle-tested mobile chat pattern
+ * CHAT LAYOUT - ChatGPT-style mobile chat pattern
  * ============================================================================
- * 
- * This layout guarantees:
- * - Header stays at top
- * - Messages scroll in the middle
- * - Input stays at bottom (above keyboard on mobile)
- * - No white space, no cut-off, no jank
  * 
  * Structure:
  * ┌─────────────────────────┐ ← viewport top
- * │ .chat-header (fixed)    │
+ * │ .chat-header-area       │ ← minimal, agent selector
  * ├─────────────────────────┤
  * │                         │
- * │ .chat-messages          │ ← flex: 1, overflow-y: auto
- * │ (scrollable)            │
+ * │ .chat-messages-area     │ ← flex: 1, scrollable
  * │                         │
  * ├─────────────────────────┤
- * │ .chat-input (fixed)     │ ← safe-area-inset-bottom
+ * │ .chat-input-area        │ ← pill input, above keyboard
  * └─────────────────────────┘ ← viewport bottom
  */
 
-.chat-layout {
-  /* Take full height of parent - critical! */
+.chat-container {
   height: 100%;
   width: 100%;
-  
-  /* Flex column layout */
   display: flex;
   flex-direction: column;
-  
-  /* Prevent any overflow from this container */
   overflow: hidden;
-  
-  /* Ensure it's a containing block */
+  position: relative;
+  /* True dark background */
+  background-color: hsl(var(--background));
+}
+
+.chat-header-area {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  min-height: 48px;
+  /* Subtle bottom border */
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+}
+
+.chat-messages-area {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+}
+
+.chat-input-area {
+  flex: 0 0 auto;
+  padding: 12px 0;
+  /* Safe area for iPhone home indicator */
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  /* Subtle gradient fade from content */
+  background: linear-gradient(to bottom, transparent, hsl(var(--background)) 8px);
+}
+
+/* ChatGPT-style pill input container */
+.chat-input-pill {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 8px 12px;
+  /* Rounded pill shape */
+  border-radius: 24px;
+  /* Dark background */
+  background-color: hsl(var(--secondary));
+  /* Subtle border */
+  border: 1px solid hsl(var(--border) / 0.5);
+  /* Min height for single line */
+  min-height: 48px;
+  transition: border-color 0.2s ease;
+}
+
+.chat-input-pill:focus-within {
+  border-color: hsl(var(--border));
+}
+
+/* Dark mode specific overrides */
+.dark .chat-input-pill {
+  background-color: #1a1a1a;
+  border-color: #2a2a2a;
+}
+
+.dark .chat-input-pill:focus-within {
+  border-color: #3a3a3a;
+}
+
+/* Legacy support for old classes */
+.chat-layout {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   position: relative;
 }
 
 .chat-header {
-  /* Never shrink, never grow */
   flex: 0 0 auto;
-  
-  /* Stay at top */
   position: sticky;
   top: 0;
   z-index: 10;
-  
-  /* Prevent content bleed-through */
   background-color: inherit;
 }
 
 .chat-messages {
-  /* Take all available space */
   flex: 1 1 auto;
-  
-  /* Enable scrolling */
   overflow-y: auto;
   overflow-x: hidden;
-  
-  /* Prevent pull-to-refresh and rubber-banding */
   overscroll-behavior: contain;
-  
-  /* Smooth momentum scrolling on iOS */
   -webkit-overflow-scrolling: touch;
-  
-  /* Minimum height to prevent collapse */
   min-height: 0;
 }
 
 .chat-input {
-  /* Never shrink, never grow */
   flex: 0 0 auto;
-  
-  /* Stay at bottom */
   position: sticky;
   bottom: 0;
   z-index: 10;
-  
-  /* Safe area for iPhone home indicator */
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  
-  /* Prevent content bleed-through */
   background-color: inherit;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Menu, PenSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getIcon, getAgentColors } from '@/lib/icons';
 
@@ -14,55 +14,58 @@ export interface ConversationHeaderAgent {
 interface ConversationHeaderProps {
   agent: ConversationHeaderAgent | null;
   onTap: () => void;
+  onNewChat?: () => void;
   className?: string;
 }
 
-export function ConversationHeader({ agent, onTap, className }: ConversationHeaderProps) {
-  if (!agent) {
-    return (
+/**
+ * ChatGPT-style header - clean, minimal, centered agent selector
+ */
+export function ConversationHeader({ agent, onTap, onNewChat, className }: ConversationHeaderProps) {
+  return (
+    <div className={cn('flex items-center justify-between w-full', className)}>
+      {/* Left spacer for balance */}
+      <div className="w-10" />
+      
+      {/* Center - Agent selector (tappable) */}
       <button
         onClick={onTap}
         className={cn(
-          'flex items-center gap-2 px-3 py-2 rounded-lg',
-          'hover:bg-muted/50 transition-colors',
-          'min-h-[48px] touch-manipulation',
-          className
+          'flex items-center gap-1.5 px-3 py-1.5 rounded-full',
+          'hover:bg-zinc-100 dark:hover:bg-zinc-800/60 transition-colors',
+          'touch-manipulation active:scale-[0.98]'
         )}
       >
-        <span className="text-muted-foreground text-sm">Select an agent...</span>
-        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        {agent ? (
+          <>
+            <span className="font-medium text-sm text-foreground">
+              {agent.name}
+            </span>
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          </>
+        ) : (
+          <>
+            <span className="text-sm text-muted-foreground">Select agent</span>
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          </>
+        )}
       </button>
-    );
-  }
-
-  const Icon = getIcon(agent.icon);
-  const colors = getAgentColors(agent.id);
-
-  return (
-    <button
-      onClick={onTap}
-      className={cn(
-        'flex items-center gap-3 px-3 py-2 rounded-lg',
-        'hover:bg-muted/50 transition-colors',
-        'min-h-[48px] touch-manipulation',
-        className
+      
+      {/* Right - New chat button */}
+      {onNewChat && (
+        <button
+          onClick={onNewChat}
+          className={cn(
+            'h-10 w-10 flex items-center justify-center rounded-full',
+            'hover:bg-zinc-100 dark:hover:bg-zinc-800/60 transition-colors',
+            'touch-manipulation active:scale-[0.98]'
+          )}
+          aria-label="New chat"
+        >
+          <PenSquare className="h-5 w-5 text-muted-foreground" />
+        </button>
       )}
-    >
-      <div className={cn(
-        'flex h-8 w-8 items-center justify-center rounded-full',
-        colors.bg
-      )}>
-        <Icon className={cn('h-5 w-5', colors.text)} aria-label={agent.name} />
-      </div>
-      <div className="flex flex-col items-start">
-        <span className="font-semibold text-foreground leading-tight">
-          {agent.name}
-        </span>
-        <span className="text-xs text-muted-foreground leading-tight">
-          {agent.role}
-        </span>
-      </div>
-      <ChevronDown className="h-4 w-4 text-muted-foreground ml-1" />
-    </button>
+      {!onNewChat && <div className="w-10" />}
+    </div>
   );
 }

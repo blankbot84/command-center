@@ -9,8 +9,7 @@ import { AgentPicker } from './agent-picker';
 import { useConversations, generateMessageId } from './hooks/use-conversations';
 import { chatAgents, getAgentById } from '@/lib/agents';
 import { ChatTextarea } from './chat-textarea';
-import { Button } from '@/components/ui/button';
-import { Send } from 'lucide-react';
+import { Send, Plus, Mic, Sparkles } from 'lucide-react';
 import type { ChatMessage as ChatMessageType, ChatAgent } from '@/types/chat';
 import { getIcon, getAgentColors } from '@/lib/icons';
 import { cn } from '@/lib/utils';
@@ -37,32 +36,73 @@ function formatRelativeTime(isoTimestamp: string): string {
  * Parse AI SDK data stream format
  */
 function parseStreamChunk(chunk: string): string {
-  // Format: 0:"text chunk"\n
   const match = chunk.match(/^0:"(.*)"/);
   if (match) {
-    // Unescape the text
     return match[1].replace(/\\"/g, '"').replace(/\\n/g, '\n');
   }
   return '';
 }
 
 /**
- * Empty state hero with agent icon
+ * ChatGPT-style empty state - elegant, centered
  */
 function EmptyConversationHero({ agent }: { agent: ChatAgent }) {
   const Icon = getIcon(agent.icon);
   const colors = getAgentColors(agent.id);
   
   return (
-    <div className="text-center text-muted-foreground py-12">
+    <div className="flex flex-col items-center justify-center flex-1 px-4 py-8">
+      {/* Agent avatar */}
       <div className={cn(
-        'inline-flex h-16 w-16 items-center justify-center rounded-full mb-4',
+        'flex h-16 w-16 items-center justify-center rounded-full mb-4',
+        'bg-gradient-to-br',
         colors.bg
       )}>
         <Icon className={cn('h-8 w-8', colors.text)} />
       </div>
-      <p className="text-lg font-medium">Chat with {agent.name}</p>
-      <p className="text-sm">{agent.role}</p>
+      
+      {/* Welcome text */}
+      <h2 className="text-xl font-semibold text-foreground mb-1">
+        {agent.name}
+      </h2>
+      <p className="text-sm text-muted-foreground text-center max-w-xs">
+        {agent.role}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Welcome state when no agent selected
+ */
+function WelcomeHero({ onSelectAgent }: { onSelectAgent: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center flex-1 px-4 py-8">
+      {/* App icon */}
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 mb-4">
+        <Sparkles className="h-8 w-8 text-white" />
+      </div>
+      
+      {/* Welcome text */}
+      <h2 className="text-xl font-semibold text-foreground mb-1">
+        Command Center
+      </h2>
+      <p className="text-sm text-muted-foreground text-center max-w-xs mb-6">
+        Chat with your AI agents
+      </p>
+      
+      <button
+        onClick={onSelectAgent}
+        className={cn(
+          'px-5 py-2.5 rounded-full',
+          'bg-foreground text-background',
+          'font-medium text-sm',
+          'hover:opacity-90 transition-opacity',
+          'touch-manipulation active:scale-[0.98]'
+        )}
+      >
+        Start a conversation
+      </button>
     </div>
   );
 }
@@ -87,7 +127,6 @@ export function Chat() {
   const [showAgentPicker, setShowAgentPicker] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Get messages from active conversation
   const messages = activeConversation?.messages ?? [];
 
   // Auto-scroll to bottom when new messages arrive
@@ -97,10 +136,10 @@ export function Chat() {
     }
   }, [messages, isLoading]);
 
-  // First-time user flow: if no conversations and loaded, show AgentPicker
+  // First-time user flow
   useEffect(() => {
     if (isLoaded && sortedConversations.length === 0 && !showAgentPicker) {
-      setShowAgentPicker(true);
+      // Don't auto-show picker, let them click the button
     }
   }, [isLoaded, sortedConversations.length, showAgentPicker]);
 
@@ -114,21 +153,19 @@ export function Chat() {
   /**
    * Handle sending a message
    */
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!input.trim() || isLoading || !activeId || !activeConversation) return;
 
     const text = input.trim();
     setInput('');
     setIsLoading(true);
 
-    // Add user message to conversation
     addMessage(activeId, {
       role: 'user',
       content: text,
     });
 
-    // Create a placeholder assistant message for streaming
     const assistantMessage = addMessage(activeId, {
       role: 'assistant',
       content: '',
@@ -136,7 +173,6 @@ export function Chat() {
     });
 
     try {
-      // Build message history for API
       const messageHistory = [
         ...messages.map((m) => ({
           role: m.role,
@@ -180,7 +216,6 @@ export function Chat() {
         }
       }
 
-      // Mark streaming complete
       updateLastMessage(activeId, { isStreaming: false });
     } catch (error) {
       console.error('Error sending message:', error);
@@ -193,32 +228,20 @@ export function Chat() {
     }
   }, [input, isLoading, activeId, activeConversation, messages, addMessage, updateLastMessage]);
 
-  /**
-   * Handle agent selection from picker
-   */
   const handleAgentSelect = useCallback((agentId: string) => {
     createConversation(agentId);
     setShowAgentPicker(false);
   }, [createConversation]);
 
-  /**
-   * Handle conversation selection
-   */
   const handleConversationSelect = useCallback((conversationId: string) => {
     setActiveConversation(conversationId);
     setShowConversationList(false);
   }, [setActiveConversation]);
 
-  /**
-   * Handle new chat button
-   */
   const handleNewChat = useCallback(() => {
     setShowAgentPicker(true);
   }, []);
 
-  /**
-   * Transform conversations for the list component
-   */
   const conversationItems: ConversationItem[] = sortedConversations.map((conv) => {
     const agent = getAgentById(conv.agentId);
     const lastMessage = conv.messages[conv.messages.length - 1];
@@ -233,33 +256,30 @@ export function Chat() {
     };
   });
 
-  // Show loading skeleton while loading from localStorage
+  // Loading skeleton
   if (!isLoaded) {
     return (
-      <div className="chat-layout">
-        {/* Header skeleton */}
-        <div className="chat-header border-b px-4 py-2 bg-background">
-          <div className="h-12 bg-muted/30 rounded animate-pulse" />
+      <div className="chat-container">
+        <div className="chat-header-area">
+          <div className="h-8 w-32 bg-zinc-200 dark:bg-zinc-800 rounded-full animate-pulse mx-auto" />
         </div>
-        {/* Messages skeleton */}
-        <div className="chat-messages p-4">
-          <div className="space-y-4 max-w-3xl mx-auto">
-            <div className="h-20 bg-muted/20 rounded animate-pulse" />
-            <div className="h-20 bg-muted/20 rounded animate-pulse ml-auto w-2/3" />
+        <div className="chat-messages-area">
+          <div className="flex flex-col items-center justify-center flex-1">
+            <div className="h-16 w-16 bg-zinc-200 dark:bg-zinc-800 rounded-full animate-pulse mb-4" />
+            <div className="h-4 w-32 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
           </div>
         </div>
-        {/* Input skeleton */}
-        <div className="chat-input border-t bg-background p-4">
-          <div className="h-10 bg-muted/30 rounded animate-pulse max-w-3xl mx-auto" />
+        <div className="chat-input-area">
+          <div className="h-12 bg-zinc-200 dark:bg-zinc-800 rounded-full animate-pulse" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="chat-layout">
-      {/* Header - fixed at top */}
-      <div className="chat-header border-b px-4 py-2 bg-background">
+    <div className="chat-container">
+      {/* Header - minimal, centered agent selector */}
+      <div className="chat-header-area">
         <ConversationHeader
           agent={activeAgent ? {
             id: activeAgent.id,
@@ -268,68 +288,95 @@ export function Chat() {
             role: activeAgent.role,
           } : null}
           onTap={() => setShowConversationList(true)}
+          onNewChat={handleNewChat}
         />
       </div>
 
-      {/* Messages area - scrollable middle */}
-      <div 
-        ref={scrollRef}
-        className="chat-messages p-4"
-      >
-        <div className="space-y-4 max-w-3xl mx-auto">
-          {messages.length === 0 && activeAgent && (
-            <EmptyConversationHero agent={activeAgent} />
-          )}
-          {messages.length === 0 && !activeAgent && (
-            <div className="text-center text-muted-foreground py-12">
-              <p className="text-lg font-medium">Welcome to Command Center Chat</p>
-              <p className="text-sm">Tap the header to select an agent</p>
+      {/* Messages area */}
+      <div ref={scrollRef} className="chat-messages-area">
+        {messages.length === 0 && activeAgent && (
+          <EmptyConversationHero agent={activeAgent} />
+        )}
+        {messages.length === 0 && !activeAgent && (
+          <WelcomeHero onSelectAgent={handleNewChat} />
+        )}
+        {messages.length > 0 && (
+          <div className="space-y-4 max-w-3xl mx-auto px-4 py-4">
+            {messages.map((message) => (
+              <ChatMessage
+                key={message.id}
+                role={message.role}
+                content={message.content}
+                agentId={activeAgent?.id}
+                agentIcon={activeAgent?.icon}
+              />
+            ))}
+            {isLoading && messages[messages.length - 1]?.role === 'user' && (
+              <TypingIndicator />
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Input area - ChatGPT style pill */}
+      <div className="chat-input-area">
+        <div className="max-w-3xl mx-auto px-3">
+          <form onSubmit={handleSubmit} className="chat-input-pill">
+            {/* Plus button */}
+            <button
+              type="button"
+              className={cn(
+                'h-8 w-8 flex items-center justify-center rounded-full shrink-0',
+                'text-zinc-400 hover:text-foreground hover:bg-zinc-700/50',
+                'transition-colors touch-manipulation'
+              )}
+              aria-label="Add attachment"
+            >
+              <Plus className="h-5 w-5" />
+            </button>
+            
+            {/* Input */}
+            <div className="flex-1 min-w-0 px-2">
+              <ChatTextarea
+                value={input}
+                onChange={setInput}
+                onSubmit={() => {
+                  if (input.trim() && !isLoading && activeConversation) {
+                    handleSubmit();
+                  }
+                }}
+                placeholder={activeAgent ? `Message ${activeAgent.name}...` : 'Select an agent to start...'}
+                disabled={isLoading || !activeConversation}
+                minHeight={24}
+                maxHeight={120}
+              />
             </div>
-          )}
-          {messages.map((message) => (
-            <ChatMessage
-              key={message.id}
-              role={message.role}
-              content={message.content}
-              agentId={activeAgent?.id}
-              agentIcon={activeAgent?.icon}
-            />
-          ))}
-          {isLoading && messages[messages.length - 1]?.role === 'user' && (
-            <TypingIndicator />
-          )}
+            
+            {/* Send button - circular, colored when active */}
+            <button 
+              type="submit" 
+              disabled={isLoading || !input.trim() || !activeConversation}
+              className={cn(
+                'h-8 w-8 flex items-center justify-center rounded-full shrink-0',
+                'transition-all duration-200 touch-manipulation',
+                input.trim() && activeConversation
+                  ? 'bg-white text-black hover:bg-zinc-200'
+                  : 'text-zinc-500 hover:text-zinc-400'
+              )}
+              aria-label="Send message"
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          </form>
+          
+          {/* Safety text */}
+          <p className="text-[10px] text-zinc-500 text-center mt-2 pb-1">
+            AI can make mistakes. Consider checking important info.
+          </p>
         </div>
       </div>
 
-      {/* Input area - fixed at bottom */}
-      <div className="chat-input border-t bg-background p-4">
-        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto flex gap-2 items-end">
-          <ChatTextarea
-            value={input}
-            onChange={setInput}
-            onSubmit={() => {
-              if (input.trim() && !isLoading && activeConversation) {
-                handleSubmit({ preventDefault: () => {} } as React.FormEvent);
-              }
-            }}
-            placeholder={activeAgent ? `Message ${activeAgent.name}...` : 'Select an agent to start...'}
-            disabled={isLoading || !activeConversation}
-            className="flex-1"
-            minHeight={44}
-            maxHeight={200}
-          />
-          <Button 
-            type="submit" 
-            disabled={isLoading || !input.trim() || !activeConversation}
-            className="h-11 w-11 shrink-0 rounded-lg"
-          >
-            <Send className="h-4 w-4" />
-            <span className="sr-only">Send</span>
-          </Button>
-        </form>
-      </div>
-
-      {/* Conversation List Sheet */}
+      {/* Sheets */}
       <ConversationList
         conversations={conversationItems}
         activeId={activeId ?? undefined}
@@ -339,7 +386,6 @@ export function Chat() {
         onOpenChange={setShowConversationList}
       />
 
-      {/* Agent Picker Sheet */}
       <AgentPicker
         agents={chatAgents}
         onSelect={handleAgentSelect}

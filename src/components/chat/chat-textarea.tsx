@@ -15,15 +15,14 @@ interface ChatTextareaProps {
 }
 
 /**
- * A polished chat textarea that mimics the UX of iMessage, Discord, ChatGPT, etc.
+ * ChatGPT-style textarea input
  * 
  * Features:
  * - Auto-grows with content (up to maxHeight)
- * - Smooth height transitions
+ * - Pill/rounded shape
+ * - Dark background in dark mode
  * - Enter to send, Shift+Enter for newline
  * - 16px font (prevents iOS zoom on focus)
- * - Proper focus states
- * - Mobile keyboard handling
  */
 export const ChatTextarea = forwardRef<HTMLTextAreaElement, ChatTextareaProps>(
   function ChatTextarea(
@@ -31,11 +30,11 @@ export const ChatTextarea = forwardRef<HTMLTextAreaElement, ChatTextareaProps>(
       value,
       onChange,
       onSubmit,
-      placeholder = 'Message...',
+      placeholder = 'Ask anything...',
       disabled = false,
       className,
       maxHeight = 200,
-      minHeight = 44,
+      minHeight = 24,
     },
     forwardedRef
   ) {
@@ -48,7 +47,7 @@ export const ChatTextarea = forwardRef<HTMLTextAreaElement, ChatTextareaProps>(
       if (!textarea) return;
 
       // Reset to min height to get accurate scrollHeight
-      textarea.style.height = `${minHeight}px`;
+      textarea.style.height = 'auto';
       
       // Calculate new height based on content
       const scrollHeight = textarea.scrollHeight;
@@ -75,7 +74,6 @@ export const ChatTextarea = forwardRef<HTMLTextAreaElement, ChatTextareaProps>(
             onSubmit();
           }
         }
-        // Shift+Enter = newline (default behavior, no prevention needed)
       },
       [disabled, value, onSubmit]
     );
@@ -111,21 +109,19 @@ export const ChatTextarea = forwardRef<HTMLTextAreaElement, ChatTextareaProps>(
         disabled={disabled}
         rows={1}
         className={cn(
-          // Base styles
-          'w-full resize-none rounded-lg border bg-background px-4 py-3',
+          // Base styles - minimal, clean
+          'w-full resize-none bg-transparent',
+          'px-1 py-0',
           // Font: 16px minimum prevents iOS zoom on focus
-          'text-base leading-relaxed',
-          // Border and focus states
-          'border-input',
-          'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
-          'focus:border-transparent',
+          'text-base leading-normal',
+          // No border, no outline - container handles this
+          'border-none outline-none focus:outline-none focus:ring-0',
           // Placeholder styling
-          'placeholder:text-muted-foreground placeholder:transition-opacity',
-          'focus:placeholder:opacity-70',
+          'placeholder:text-zinc-500 dark:placeholder:text-zinc-400',
           // Smooth height transition
-          'transition-[height,box-shadow,border-color] duration-150 ease-out',
+          'transition-[height] duration-100 ease-out',
           // Scrollbar styling
-          'scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent',
+          'scrollbar-thin scrollbar-thumb-zinc-600 scrollbar-track-transparent',
           // Disabled state
           'disabled:cursor-not-allowed disabled:opacity-50',
           // Touch improvements
