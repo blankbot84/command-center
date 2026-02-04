@@ -9,7 +9,7 @@ import { AgentPicker } from './agent-picker';
 import { useConversations, generateMessageId } from './hooks/use-conversations';
 import { chatAgents, getAgentById } from '@/lib/agents';
 import { ChatTextarea } from './chat-textarea';
-import { Send, Plus, Mic, Sparkles } from 'lucide-react';
+import { Send, Plus, Mic, Sparkles, ChevronDown } from 'lucide-react';
 import type { ChatMessage as ChatMessageType, ChatAgent } from '@/types/chat';
 import { getIcon, getAgentColors } from '@/lib/icons';
 import { cn } from '@/lib/utils';
@@ -260,9 +260,6 @@ export function Chat() {
   if (!isLoaded) {
     return (
       <div className="chat-container">
-        <div className="chat-header-area">
-          <div className="h-8 w-32 bg-zinc-200 dark:bg-zinc-800 rounded-full animate-pulse mx-auto" />
-        </div>
         <div className="chat-messages-area">
           <div className="flex flex-col items-center justify-center flex-1">
             <div className="h-16 w-16 bg-zinc-200 dark:bg-zinc-800 rounded-full animate-pulse mb-4" />
@@ -278,19 +275,18 @@ export function Chat() {
 
   return (
     <div className="chat-container">
-      {/* Header - minimal, centered agent selector */}
-      <div className="chat-header-area">
-        <ConversationHeader
-          agent={activeAgent ? {
-            id: activeAgent.id,
-            icon: activeAgent.icon,
-            name: activeAgent.name,
-            role: activeAgent.role,
-          } : null}
-          onTap={() => setShowConversationList(true)}
-          onNewChat={handleNewChat}
-        />
-      </div>
+      {/* Agent selector bar - compact */}
+      {activeAgent && (
+        <div className="flex-shrink-0 flex items-center justify-center py-2 border-b border-border/30">
+          <button
+            onClick={() => setShowConversationList(true)}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full hover:bg-secondary/50 transition-colors"
+          >
+            <span className="text-sm font-medium">{activeAgent.name}</span>
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          </button>
+        </div>
+      )}
 
       {/* Messages area */}
       <div ref={scrollRef} className="chat-messages-area">
