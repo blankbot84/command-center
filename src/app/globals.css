@@ -60,6 +60,16 @@
 /* Light mode - clean industrial */
 :root {
   --radius: 0;
+  
+  /* Mobile CSS variables - set by JS hooks, fallback to 0 */
+  --keyboard-height: 0px;
+  --viewport-height: 100dvh;
+  
+  /* Safe area insets with fallbacks */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
   --background: #f5f5f5;
   --foreground: #0a0a0a;
   --card: #ffffff;
@@ -159,5 +169,141 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/*
+ * ============================================================================
+ * MOBILE UX UTILITIES (Milestone #8)
+ * ============================================================================
+ * 
+ * CSS patterns for mobile-first chat interfaces.
+ * See Issues #43 (keyboard handling) and #44 (safe areas, auto-scroll).
+ * 
+ * KEY CONCEPTS:
+ * 
+ * 1. DYNAMIC VIEWPORT UNITS (dvh)
+ *    - Use 100dvh instead of 100vh for iOS Safari
+ *    - 100vh is static and doesn't account for browser chrome
+ *    - 100dvh shrinks when URL bar/keyboard appears
+ * 
+ * 2. SAFE AREA INSETS
+ *    - env(safe-area-inset-*) for notches and home indicators
+ *    - Always use with fallback: env(safe-area-inset-bottom, 0px)
+ * 
+ * 3. KEYBOARD HEIGHT
+ *    - --keyboard-height is set by useKeyboardHeight() hook
+ *    - Use for input areas that need to stay above keyboard
+ * 
+ * 4. SCROLL BEHAVIOR
+ *    - overscroll-behavior: contain prevents pull-to-refresh
+ *    - -webkit-overflow-scrolling: touch for momentum scrolling
+ * 
+ * USAGE EXAMPLES:
+ * 
+ * Full-height chat container:
+ *   .chat-container { height: 100dvh; height: calc(100dvh - var(--keyboard-height, 0px)); }
+ * 
+ * Input bar above keyboard and home indicator:
+ *   .input-bar { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px); }
+ * 
+ * Scrollable message list without pull-to-refresh:
+ *   .messages { overscroll-behavior: contain; }
+ * ============================================================================
+ */
+
+@layer utilities {
+  /* Full viewport height accounting for keyboard */
+  .h-screen-dynamic {
+    height: 100dvh;
+    height: calc(100dvh - var(--keyboard-height, 0px));
+  }
+
+  /* Minimum height that accounts for keyboard */
+  .min-h-screen-dynamic {
+    min-height: 100dvh;
+    min-height: calc(100dvh - var(--keyboard-height, 0px));
+  }
+
+  /* Safe area padding utilities */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  .safe-area-x {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  .safe-area-y {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .safe-area-all {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+
+  /* Prevent pull-to-refresh and rubber-banding */
+  .overscroll-contain {
+    overscroll-behavior: contain;
+  }
+
+  .overscroll-none {
+    overscroll-behavior: none;
+  }
+
+  /* Momentum scrolling for iOS */
+  .scroll-touch {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Input area that stays above keyboard */
+  .keyboard-aware {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--keyboard-height, 0px));
+    transition: padding-bottom 0.1s ease-out;
+  }
+
+  /* Prevent text size adjustment on orientation change */
+  .text-size-adjust-none {
+    -webkit-text-size-adjust: none;
+    text-size-adjust: none;
+  }
+
+  /* Disable touch callout (long-press menu) */
+  .touch-callout-none {
+    -webkit-touch-callout: none;
+  }
+
+  /* Disable user selection for UI elements */
+  .select-none-touch {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
   }
 }
